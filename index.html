@@ -1,767 +1,718 @@
-<!DOCTYPE html>
-<html lang="ru">
-<head>
-<meta charset="UTF-8">
-<meta name="viewport" content="width=device-width, initial-scale=1.0">
-<title>Редактор: Битва с Боссом</title>
-<style>
-  /* --- ШРИФТЫ И БАЗОВЫЙ СТИЛЬ --- */
-  @import url('https://fonts.googleapis.com/css2?family=Press+Start+2P&family=Rajdhani:wght@600;700&family=Roboto:wght@400;700&display=swap');
+<div id="FX_ROOT">
+  <style>
+    /* --- ШРИФТЫ --- */
+    @import url('https://fonts.googleapis.com/css2?family=Rajdhani:wght@500;600;700&family=Montserrat:wght@400;700;900&display=swap');
+    @import url('https://fonts.googleapis.com/css2?family=Press+Start+2P&display=swap');
 
-  :root {
-    --bg-dark: #121214;
-    --bg-panel: #1e1e24;
-    --primary: #ffd700; /* Gold */
-    --hero-color: #00e5ff; /* Cyan */
-    --boss-color: #ff0055; /* Red */
-    --text: #ffffff;
-    --border: rgba(255, 255, 255, 0.1);
-  }
-
-  body {
-    margin: 0; padding: 0;
-    background-color: var(--bg-dark);
-    color: var(--text);
-    font-family: 'Roboto', sans-serif;
-    height: 100vh;
-    display: flex;
-    flex-direction: column;
-    overflow: hidden;
-  }
-
-  /* --- ШАПКА --- */
-  header {
-    height: 60px;
-    background: #000;
-    border-bottom: 2px solid var(--border);
-    display: flex;
-    align-items: center;
-    justify-content: space-between;
-    padding: 0 20px;
-    flex-shrink: 0;
-  }
-  .app-title {
-    font-family: 'Press Start 2P', cursive;
-    font-size: 14px;
-    color: var(--primary);
-    text-transform: uppercase;
-    letter-spacing: 1px;
-    display: flex;
-    align-items: center;
-    gap: 10px;
-  }
-  .lang-switch {
-    display: flex;
-    gap: 5px;
-  }
-  .lang-btn {
-    background: #333;
-    border: 1px solid #555;
-    color: #888;
-    padding: 5px 10px;
-    cursor: pointer;
-    font-size: 10px;
-    font-weight: bold;
-    border-radius: 4px;
-  }
-  .lang-btn.active {
-    background: var(--primary);
-    color: #000;
-    border-color: var(--primary);
-  }
-
-  /* --- ОСНОВНОЙ МАКЕТ --- */
-  .main-container {
-    display: flex;
-    flex: 1;
-    overflow: hidden;
-  }
-
-  /* ЛЕВАЯ ПАНЕЛЬ (НАСТРОЙКИ) */
-  .sidebar {
-    width: 350px;
-    background: var(--bg-panel);
-    border-right: 1px solid var(--border);
-    display: flex;
-    flex-direction: column;
-    overflow-y: auto;
-    flex-shrink: 0;
-  }
-
-  .tabs {
-    display: flex;
-    background: #111;
-  }
-  .tab-btn {
-    flex: 1;
-    padding: 15px;
-    background: transparent;
-    border: none;
-    color: #666;
-    font-family: 'Rajdhani', sans-serif;
-    font-weight: 700;
-    text-transform: uppercase;
-    cursor: pointer;
-    border-bottom: 3px solid transparent;
-    transition: 0.2s;
-  }
-  .tab-btn.active {
-    color: #fff;
-    background: #222;
-  }
-  .tab-btn[data-tab="hero"].active { border-bottom-color: var(--hero-color); }
-  .tab-btn[data-tab="boss"].active { border-bottom-color: var(--boss-color); }
-  .tab-btn[data-tab="quest"].active { border-bottom-color: var(--primary); }
-
-  .panel-content {
-    padding: 20px;
-    display: none;
-    flex-direction: column;
-    gap: 20px;
-  }
-  .panel-content.active { display: flex; }
-
-  /* Элементы управления */
-  .control-group {
-    background: rgba(0,0,0,0.2);
-    padding: 15px;
-    border-radius: 6px;
-    border: 1px solid var(--border);
-  }
-  label {
-    display: block;
-    font-size: 11px;
-    text-transform: uppercase;
-    color: #aaa;
-    margin-bottom: 8px;
-    font-weight: bold;
-    font-family: 'Rajdhani', sans-serif;
-    letter-spacing: 1px;
-  }
-  input[type="text"], textarea {
-    width: 100%;
-    background: #000;
-    border: 1px solid #444;
-    color: #fff;
-    padding: 10px;
-    border-radius: 4px;
-    font-size: 13px;
-    margin-bottom: 5px;
-  }
-  input[type="text"]:focus { border-color: var(--primary); outline: none; }
-  
-  .file-drop {
-    border: 2px dashed #444;
-    padding: 15px;
-    text-align: center;
-    cursor: pointer;
-    transition: 0.2s;
-    border-radius: 4px;
-    font-size: 11px;
-    color: #888;
-  }
-  .file-drop:hover { border-color: var(--text); color: var(--text); }
-  input[type="file"] { display: none; }
-
-  .answers-list { display: flex; flex-direction: column; gap: 10px; }
-  .ans-row { display: flex; gap: 5px; align-items: center; }
-  .ans-marker { width: 10px; height: 10px; border-radius: 50%; }
-  .ans-correct { background: #00ff88; box-shadow: 0 0 5px #00ff88; }
-  .ans-wrong { background: #ff0055; }
-
-  /* ПРАВАЯ ПАНЕЛЬ (ПРЕВЬЮ) */
-  .preview-area {
-    flex: 1;
-    background: #050505;
-    background-image: 
-        linear-gradient(rgba(0, 255, 100, 0.03) 1px, transparent 1px),
-        linear-gradient(90deg, rgba(0, 255, 100, 0.03) 1px, transparent 1px);
-    background-size: 50px 50px;
-    display: flex;
-    align-items: center;
-    justify-content: center;
-    position: relative;
-    padding: 20px;
-  }
-
-  /* Сцена Игры (Визуализация того, что будет в Genially) */
-  .game-stage {
-    width: 100%;
-    max-width: 800px;
-    aspect-ratio: 16 / 9;
-    background: url('https://images.unsplash.com/photo-1542751371-adc38448a05e?q=80&w=2070&auto=format&fit=crop') center/cover;
-    position: relative;
-    border: 2px solid #333;
-    box-shadow: 0 0 50px rgba(0,0,0,0.7);
-    overflow: hidden;
-    font-family: 'Rajdhani', sans-serif;
-  }
-  /* Затемнение фона игры */
-  .game-stage::before {
-    content: ''; position: absolute; inset: 0; background: rgba(0,0,0,0.6);
-  }
-
-  /* HUD */
-  .hud-top {
-    position: absolute; top: 20px; left: 20px; right: 20px;
-    display: flex; justify-content: space-between;
-    z-index: 5;
-  }
-  .hp-box { width: 40%; }
-  .hp-name { color: #fff; font-size: 14px; font-weight: 800; text-transform: uppercase; margin-bottom: 5px; text-shadow: 2px 2px 0 #000; }
-  .hp-bar-bg { width: 100%; height: 12px; background: #333; border: 2px solid #fff; border-radius: 6px; overflow: hidden; }
-  .hp-fill { height: 100%; width: 100%; transition: width 0.3s; }
-  .hp-hero .hp-fill { background: var(--hero-color); }
-  .hp-boss .hp-fill { background: var(--boss-color); }
-
-  /* Characters */
-  .chars-layer {
-    position: absolute; top: 15%; bottom: 35%; left: 5%; right: 5%;
-    display: flex; justify-content: space-between; align-items: flex-end;
-    z-index: 2;
-  }
-  .char-sprite {
-    max-height: 100%; max-width: 40%;
-    filter: drop-shadow(0 0 10px rgba(0,0,0,0.5));
-    transition: transform 0.2s, filter 0.2s;
-  }
-  .char-hero { animation: anim-idle 3s ease-in-out infinite; }
-  .char-boss { animation: anim-idle 4s ease-in-out infinite reverse; }
-
-  /* Battle Menu (Bottom) */
-  .battle-ui {
-    position: absolute; bottom: 0; left: 0; width: 100%; height: 35%;
-    background: linear-gradient(to top, #000 90%, transparent);
-    z-index: 10;
-    display: flex;
-    flex-direction: column;
-    align-items: center;
-    justify-content: center;
-    padding: 10px 20px;
-  }
-  .dialog-box {
-    background: rgba(0, 40, 80, 0.8);
-    border: 2px solid var(--hero-color);
-    width: 90%;
-    border-radius: 8px;
-    padding: 10px;
-    margin-bottom: 10px;
-    color: #fff;
-    font-size: 16px;
-    text-align: center;
-    min-height: 40px;
-    display: flex; align-items: center; justify-content: center;
-    box-shadow: 0 0 15px rgba(0, 229, 255, 0.2);
-  }
-  .actions-grid {
-    display: flex; gap: 10px; flex-wrap: wrap; justify-content: center; width: 100%;
-  }
-  .action-btn {
-    background: linear-gradient(180deg, #333, #111);
-    border: 1px solid #666;
-    color: #fff;
-    padding: 8px 20px;
-    font-family: 'Rajdhani', sans-serif;
-    font-weight: 700;
-    font-size: 14px;
-    text-transform: uppercase;
-    cursor: default; /* В превью не кликаем */
-    border-radius: 4px;
-    min-width: 120px;
-  }
-  .action-btn.correct-preview { border-color: var(--primary); color: var(--primary); }
-
-  /* АНИМАЦИИ ДЛЯ ПРЕВЬЮ */
-  @keyframes anim-idle { 0%,100% { transform: translateY(0); } 50% { transform: translateY(-10px); } }
-
-  /* FOOTER (КНОПКА КОПИРОВАНИЯ) */
-  .footer-bar {
-    position: absolute; bottom: 20px; z-index: 50;
-    width: 100%; display: flex; justify-content: center; pointer-events: none;
-  }
-  .btn-copy {
-    pointer-events: auto;
-    background: var(--primary);
-    color: #000;
-    border: none;
-    padding: 15px 50px;
-    font-family: 'Press Start 2P', cursive;
-    font-size: 12px;
-    cursor: pointer;
-    box-shadow: 0 0 20px rgba(255, 215, 0, 0.4);
-    transition: 0.3s;
-    border: 2px solid #fff;
-  }
-  .btn-copy:hover { transform: scale(1.05); box-shadow: 0 0 40px rgba(255, 215, 0, 0.8); }
-  .btn-copy:active { transform: scale(0.95); }
-  
-  /* Скрытый textarea для генерации */
-  #code-buffer { position: absolute; left: -9999px; }
-
-</style>
-</head>
-<body>
-
-  <!-- ШАПКА -->
-  <header>
-    <div class="app-title">
-      <span style="font-size:24px;">⚔️</span>
-      <span id="ui-title">БИТВА С БОССОМ</span>
-    </div>
-    <div class="lang-switch">
-      <button class="lang-btn active" onclick="setAppLang('ru')">RU</button>
-      <button class="lang-btn" onclick="setAppLang('en')">EN</button>
-    </div>
-  </header>
-
-  <!-- КОНТЕЙНЕР -->
-  <div class="main-container">
+    /* --- ПЕРЕМЕННЫЕ --- */
+    #FX_ROOT {
+      --bg-dark: #050505;
+      --bg-panel: rgba(18, 18, 24, 0.96);
+      --primary: #ffd700; /* Золотой (RPG стиль) */
+      --cyan: #00e5ff;
+      --pink: #ff0055;
+      --green: #00ff88;
+      --grey: #444;
+      --text: #ffffff;
+      --border: rgba(255, 255, 255, 0.15);
+      
+      width: 100%; height: 100%;
+      font-family: 'Montserrat', sans-serif;
+      background: var(--bg-dark);
+      /* Фоновая сетка */
+      background-image: 
+        linear-gradient(rgba(255, 255, 255, 0.03) 1px, transparent 1px),
+        linear-gradient(90deg, rgba(255, 255, 255, 0.03) 1px, transparent 1px);
+      background-size: 30px 30px;
+      color: var(--text);
+      overflow: hidden;
+      position: relative;
+      display: flex; flex-direction: column;
+    }
     
-    <!-- СЛЕВА: НАСТРОЙКИ -->
-    <div class="sidebar">
-      <div class="tabs">
-        <button class="tab-btn active" data-tab="hero" onclick="switchTab('hero')">ГЕРОЙ</button>
-        <button class="tab-btn" data-tab="boss" onclick="switchTab('boss')">БОСС</button>
-        <button class="tab-btn" data-tab="quest" onclick="switchTab('quest')">КВЕСТ</button>
-      </div>
+    #FX_ROOT * { box-sizing: border-box; user-select: none; outline: none; }
+    
+    /* Скроллбары */
+    #FX_ROOT ::-webkit-scrollbar { width: 5px; }
+    #FX_ROOT ::-webkit-scrollbar-track { background: #000; }
+    #FX_ROOT ::-webkit-scrollbar-thumb { background: var(--cyan); border-radius: 3px; }
 
-      <!-- Вкладка ГЕРОЙ -->
-      <div class="panel-content active" id="panel-hero">
-        <div class="control-group">
-          <label id="lbl-hero-name">Имя Героя</label>
-          <input type="text" id="inp-hero-name" value="Student Lvl.1" oninput="updatePreview()">
-        </div>
-        <div class="control-group">
-          <label id="lbl-hero-img">Аватар Героя</label>
-          <div class="file-drop" onclick="document.getElementById('file-hero').click()">
-             <span id="txt-drop">Нажми, чтобы загрузить файл</span>
-          </div>
-          <input type="file" id="file-hero" accept="image/*" onchange="handleFile(this, 'hero')">
-          <label style="margin-top:10px;">Или ссылка (URL)</label>
-          <input type="text" id="url-hero" placeholder="https://..." oninput="handleUrl(this, 'hero')">
-        </div>
-      </div>
+    /* --- UI ЭЛЕМЕНТЫ --- */
+    .fx-btn {
+      background: rgba(255,255,255,0.05);
+      border: 1px solid var(--border);
+      color: var(--text);
+      padding: 8px;
+      cursor: pointer;
+      font-family: 'Rajdhani', sans-serif;
+      font-weight: 700;
+      text-transform: uppercase;
+      transition: 0.2s;
+      border-radius: 4px;
+      font-size: 11px;
+      text-align: center;
+    }
+    .fx-btn:hover { border-color: var(--cyan); color: var(--cyan); background: rgba(0, 229, 255, 0.1); }
+    .fx-btn.active { background: var(--cyan); color: #000; border-color: var(--cyan); box-shadow: 0 0 10px rgba(0,229,255,0.4); }
+    
+    .fx-input, .fx-textarea {
+      background: #000; border: 1px solid var(--border); color: #fff;
+      padding: 8px; width: 100%; font-size: 11px; border-radius: 4px;
+      font-family: monospace; transition: 0.3s; margin-bottom: 5px;
+    }
+    .fx-input:focus, .fx-textarea:focus { border-color: var(--cyan); }
 
-      <!-- Вкладка БОСС -->
-      <div class="panel-content" id="panel-boss">
-        <div class="control-group">
-          <label id="lbl-boss-name">Имя Босса</label>
-          <input type="text" id="inp-boss-name" value="BOSS 9000" oninput="updatePreview()">
-        </div>
-        <div class="control-group">
-          <label id="lbl-boss-img">Аватар Босса</label>
-          <div class="file-drop" onclick="document.getElementById('file-boss').click()">
-             <span id="txt-drop2">Нажми, чтобы загрузить файл</span>
-          </div>
-          <input type="file" id="file-boss" accept="image/*" onchange="handleFile(this, 'boss')">
-          <label style="margin-top:10px;">Или ссылка (URL)</label>
-          <input type="text" id="url-boss" placeholder="https://..." oninput="handleUrl(this, 'boss')">
-        </div>
-        <div class="control-group">
-          <label id="lbl-win-msg">Сообщение Победы</label>
-          <input type="text" id="inp-win-msg" value="VICTORY! +100 XP">
-        </div>
-      </div>
+    /* Успешная загрузка */
+    .upload-success { border-color: var(--green) !important; box-shadow: 0 0 10px var(--green) !important; }
 
-      <!-- Вкладка КВЕСТ -->
-      <div class="panel-content" id="panel-quest">
-        <div class="control-group">
-          <label id="lbl-question">Вопрос / Атака</label>
-          <textarea id="inp-question" rows="3" oninput="updatePreview()">2 + 2 * 2 = ?</textarea>
-        </div>
-        
-        <div class="control-group">
-          <label id="lbl-correct" style="color:#00ff88">Верный ответ (Крит. Удар)</label>
-          <div class="ans-row">
-            <div class="ans-marker ans-correct"></div>
-            <input type="text" id="inp-ans-cor" value="6" oninput="updatePreview()">
-          </div>
-        </div>
+    /* --- ЛАНДИНГ (ЯЗЫК) --- */
+    .view-landing {
+      position: absolute; inset: 0; z-index: 50;
+      background: var(--bg-dark);
+      display: flex; flex-direction: column; align-items: center; justify-content: center;
+      transition: transform 0.6s cubic-bezier(0.7,0,0.3,1);
+    }
+    .view-landing.hidden { transform: translateY(-100%); pointer-events: none; }
+    
+    .landing-title { font-family: 'Press Start 2P', cursive; font-size: 40px; line-height: 1.5; margin-bottom: 40px; text-align: center; color: var(--cyan); text-shadow: 4px 4px 0 #ff0055; }
+    
+    .lang-select { display: flex; gap: 20px; }
+    .btn-lang {
+      width: 100px; height: 100px; border-radius: 12px;
+      border: 2px solid var(--border); background: rgba(255,255,255,0.05);
+      font-size: 24px; font-weight: 900; color: #fff; cursor: pointer;
+      display: flex; flex-direction: column; align-items: center; justify-content: center;
+      transition: 0.3s;
+    }
+    .btn-lang:hover { border-color: var(--cyan); background: rgba(0, 229, 255, 0.1); transform: scale(1.05); }
 
-        <div class="control-group">
-          <label id="lbl-wrong" style="color:#ff0055">Неверные ответы (Промахи)</label>
-          <div class="answers-list">
-            <div class="ans-row">
-              <div class="ans-marker ans-wrong"></div>
-              <input type="text" class="wrong-ans" value="8" oninput="updatePreview()">
-            </div>
-            <div class="ans-row">
-              <div class="ans-marker ans-wrong"></div>
-              <input type="text" class="wrong-ans" value="4" oninput="updatePreview()">
-            </div>
-            <div class="ans-row">
-              <div class="ans-marker ans-wrong"></div>
-              <input type="text" class="wrong-ans" placeholder="(необязательно)" oninput="updatePreview()">
-            </div>
-          </div>
-        </div>
-      </div>
-    </div>
+    /* --- РЕДАКТОР --- */
+    .view-editor {
+      flex: 1; display: flex; opacity: 0; transition: opacity 1s 0.5s; pointer-events: none;
+    }
+    .view-editor.visible { opacity: 1; pointer-events: auto; }
 
-    <!-- СПРАВА: ПРЕВЬЮ -->
-    <div class="preview-area">
-      <div class="game-stage">
-        
-        <!-- Верхняя панель HP -->
-        <div class="hud-top">
-          <div class="hp-box hp-hero">
-            <div class="hp-name" id="prev-hero-name">HERO</div>
-            <div class="hp-bar-bg"><div class="hp-fill"></div></div>
-          </div>
-          <div class="hp-box hp-boss">
-            <div class="hp-name" id="prev-boss-name" style="text-align:right">BOSS</div>
-            <div class="hp-bar-bg"><div class="hp-fill"></div></div>
-          </div>
-        </div>
+    /* Сайдбар */
+    .sidebar {
+      width: 360px; background: var(--bg-panel); border-right: 1px solid var(--border);
+      display: flex; flex-direction: column; z-index: 10;
+    }
+    
+    .tabs-header { display: flex; border-bottom: 1px solid var(--border); }
+    .tab-link {
+      flex: 1; padding: 12px 5px; text-align: center; background: transparent; border: none;
+      color: #888; font-weight: 800; text-transform: uppercase; cursor: pointer;
+      font-size: 11px; transition: 0.3s;
+    }
+    .tab-link:hover { color: #fff; }
+    .tab-link.active { color: var(--cyan); background: rgba(255,255,255,0.05); border-bottom: 2px solid var(--cyan); }
 
-        <!-- Сцена с персонажами -->
-        <div class="chars-layer">
-          <img src="https://i.ibb.co/6rQ61q5/hero-placeholder.png" class="char-sprite char-hero" id="prev-hero-img" alt="Hero">
-          <img src="https://i.ibb.co/9gJ720j/boss-placeholder.png" class="char-sprite char-boss" id="prev-boss-img" alt="Boss">
-        </div>
+    .tab-content { padding: 15px; overflow-y: auto; display: none; flex-direction: column; gap: 15px; height: 100%; }
+    .tab-content.show { display: flex; }
 
-        <!-- Меню битвы (внизу) -->
-        <div class="battle-ui">
-          <div class="dialog-box" id="prev-question">
-            Ready to fight?
-          </div>
-          <div class="actions-grid" id="prev-buttons">
-            <!-- Кнопки генерируются JS -->
-          </div>
-        </div>
+    .control-group { background: rgba(0,0,0,0.3); padding: 10px; border-radius: 8px; border: 1px solid var(--border); }
+    .control-label { font-size: 10px; text-transform: uppercase; color: var(--cyan); margin-bottom: 8px; font-weight: 700; display: block; letter-spacing: 1px; }
 
-      </div>
+    /* Сетки и контролы */
+    .anim-grid { display: grid; grid-template-columns: repeat(3, 1fr); gap: 4px; }
+    .type-switch { display: flex; gap: 5px; margin-bottom: 10px; }
+    .type-btn { flex: 1; padding: 8px; background: #222; border: 1px solid #444; color: #888; cursor: pointer; font-size: 10px; text-transform: uppercase; font-weight: 700; border-radius: 4px; }
+    .type-btn.active { background: var(--cyan); color: #000; border-color: var(--cyan); }
 
-      <div class="footer-bar">
-        <button class="btn-copy" onclick="generateAndCopy()">СКОПИРОВАТЬ КОД</button>
-      </div>
+    .toggle-row { display: flex; justify-content: space-between; align-items: center; margin-bottom: 5px; }
+    input[type="checkbox"] { accent-color: var(--cyan); transform: scale(1.2); cursor: pointer; }
+
+    /* Input Range */
+    input[type=range] { -webkit-appearance: none; width: 100%; background: transparent; margin: 5px 0; }
+    input[type=range]::-webkit-slider-thumb {
+      -webkit-appearance: none; height: 12px; width: 12px; border-radius: 50%;
+      background: var(--cyan); margin-top: -4px; cursor: pointer; border: 1px solid #fff;
+    }
+    input[type=range]::-webkit-slider-runnable-track {
+      width: 100%; height: 4px; cursor: pointer; background: rgba(255,255,255,0.1); border-radius: 2px;
+    }
+
+    /* --- СЦЕНА (PREVIEW) --- */
+    .stage {
+      flex: 1; position: relative;
+      background-color: #000;
+      background-size: cover; background-position: center;
+      display: flex; align-items: center; justify-content: center;
+      overflow: hidden;
+    }
+    .stage-overlay { position: absolute; inset: 0; background: rgba(0,0,0,0.4); z-index: 1; pointer-events: none; }
+
+    .battle-preview {
+      width: 90%; height: 70%; display: flex; justify-content: space-between; align-items: flex-end; z-index: 2; position: relative;
+    }
+    .char-box { width: 40%; height: 100%; display: flex; align-items: flex-end; justify-content: center; position: relative; }
+    .char-img {
+      max-width: 100%; max-height: 100%; object-fit: contain; transition: 0.3s;
+      /* CSS Vars for anims */
+    }
+
+    /* КНОПКА ГЕНЕРАЦИИ */
+    .code-dock {
+      position: absolute; bottom: 30px; left: 50%; transform: translateX(-50%); z-index: 20;
+    }
+    .btn-generate {
+      background: transparent;
+      color: #fff;
+      padding: 15px 40px;
+      font-size: 16px;
+      font-family: 'Rajdhani', sans-serif;
+      font-weight: 700;
+      text-transform: uppercase;
+      border: 2px solid #fff;
+      border-radius: 50px;
+      cursor: pointer;
+      box-shadow: 0 0 10px var(--cyan), inset 0 0 10px var(--cyan);
+      text-shadow: 0 0 5px var(--cyan);
+      transition: 0.3s;
+      animation: neonPulse 2s infinite;
+    }
+    @keyframes neonPulse { 0%,100%{box-shadow: 0 0 10px var(--cyan), inset 0 0 10px var(--cyan);} 50%{box-shadow: 0 0 25px var(--cyan), inset 0 0 20px var(--cyan); text-shadow:0 0 10px #fff;} }
+    .btn-generate:hover { background: var(--cyan); color: #000; box-shadow: 0 0 50px var(--cyan); }
+    
+    #hidden_code { opacity: 0; position: absolute; pointer-events: none; }
+
+    /* --- CSS KEYFRAMES ДЛЯ АНИМАЦИЙ --- */
+    @keyframes fx-idle { 0%,100%{transform:translateY(0)} 50%{transform:translateY(-6px)} }
+    @keyframes fx-float { 0%,100%{transform:translateY(0) rotate(0deg)} 50%{transform:translateY(-15px) rotate(2deg)} }
+    @keyframes fx-pulse { 0%,100%{transform:scale(1)} 50%{transform:scale(1.05)} }
+    @keyframes fx-shake { 0%{transform: translate(1px, 1px)} 20%{transform: translate(-3px, 0px)} 40%{transform: translate(1px, -1px)} 60%{transform: translate(-3px, 1px)} 80%{transform: translate(-1px, -1px)} 100%{transform: translate(1px, -2px)} }
+    @keyframes fx-glitch { 0%{transform: translate(0)} 20%{transform: translate(-2px, 2px)} 40%{transform: translate(-2px, -2px)} 60%{transform: translate(2px, 2px)} 80%{transform: translate(2px, -2px)} 100%{transform: translate(0)} }
+    @keyframes fx-spin { 0%{transform: rotateY(0deg)} 100%{transform: rotateY(360deg)} }
+    @keyframes fx-neon { 0%,100%{opacity: 1; filter: brightness(1)} 50%{opacity: 0.8; filter: brightness(1.5)} }
+    @keyframes fx-wobble { 0%,100%{transform:rotate(0deg)} 25%{transform:rotate(-5deg)} 75%{transform:rotate(5deg)} }
+    @keyframes fx-swing { 0%{transform:rotate(0deg)} 20%{transform:rotate(15deg)} 40%{transform:rotate(-10deg)} 60%{transform:rotate(5deg)} 80%{transform:rotate(-5deg)} 100%{transform:rotate(0deg)} }
+    @keyframes fx-bounce { 0%, 20%, 50%, 80%, 100% {transform: translateY(0);} 40% {transform: translateY(-30px);} 60% {transform: translateY(-15px);} }
+    @keyframes fx-flip { 0% {transform: rotateY(0);} 100% {transform: rotateY(360deg);} }
+    @keyframes fx-ghost { 0%,100% { opacity: 1; transform: scale(1); } 50% { opacity: 0.4; transform: scale(1.05); } }
+
+  </style>
+
+  <!-- ЭКРАН 1: ВЫБОР ЯЗЫКА -->
+  <div class="view-landing" id="view_landing">
+    <div class="landing-title">БИТВА<br>С БОССОМ</div>
+    <div class="lang-select">
+      <div class="btn-lang" onclick="app.setLang('ru')">RU</div>
+      <div class="btn-lang" onclick="app.setLang('en')">EN</div>
     </div>
   </div>
 
-  <textarea id="code-buffer"></textarea>
+  <!-- ЭКРАН 2: РЕДАКТОР -->
+  <div class="view-editor" id="view_editor">
+    
+    <!-- ПАНЕЛЬ УПРАВЛЕНИЯ -->
+    <div class="sidebar">
+      <div class="tabs-header">
+        <button class="tab-link active" onclick="app.tab('hero')" id="t_hero">ГЕРОЙ</button>
+        <button class="tab-link" onclick="app.tab('boss')" id="t_boss">БОСС</button>
+        <button class="tab-link" onclick="app.tab('quest')" id="t_quest">КВЕСТ</button>
+      </div>
 
+      <!-- ГЕРОЙ -->
+      <div class="tab-content show" id="p_hero">
+        <div class="control-group">
+          <span class="control-label" id="l_h_name">Имя</span>
+          <input type="text" class="fx-input" id="i_h_name" value="Student">
+          <button class="fx-btn" style="width:100%" onclick="document.getElementById('f_hero').click()" id="b_h_up">ЗАГРУЗИТЬ КАРТИНКУ</button>
+          <input type="file" id="f_hero" hidden accept="image/*">
+          <input type="text" class="fx-input" id="u_hero" placeholder="URL..." style="margin-top:5px">
+        </div>
+        
+        <div class="control-group">
+          <span class="control-label" id="l_h_anim">Анимация</span>
+          <div class="anim-grid" id="ag_hero"></div>
+        </div>
+
+        <div class="control-group">
+          <span class="control-label" id="l_h_set">Настройки</span>
+          <label style="font-size:9px; color:#888;">Size / Размер</label>
+          <input type="range" id="r_h_size" min="50" max="150" value="100">
+          <label style="font-size:9px; color:#888;">Opacity / Прозрачность</label>
+          <input type="range" id="r_h_op" min="0" max="100" value="100">
+          <div style="display:flex; gap:5px; margin-top:5px; align-items:center;">
+             <label style="font-size:9px; color:#888;">Glow:</label>
+             <input type="color" id="c_h_glow" value="#00e5ff" style="border:none; width:20px; height:20px; background:none; padding:0;">
+             <input type="range" id="r_h_glow" min="0" max="50" value="0">
+          </div>
+        </div>
+      </div>
+
+      <!-- БОСС -->
+      <div class="tab-content" id="p_boss">
+        <div class="control-group">
+          <span class="control-label" id="l_b_name">Имя</span>
+          <input type="text" class="fx-input" id="i_b_name" value="BOSS">
+          <button class="fx-btn" style="width:100%" onclick="document.getElementById('f_boss').click()" id="b_b_up">ЗАГРУЗИТЬ КАРТИНКУ</button>
+          <input type="file" id="f_boss" hidden accept="image/*">
+          <input type="text" class="fx-input" id="u_boss" placeholder="URL..." style="margin-top:5px">
+        </div>
+
+        <div class="control-group">
+          <span class="control-label" id="l_b_anim">Анимация</span>
+          <div class="anim-grid" id="ag_boss"></div>
+        </div>
+
+        <div class="control-group">
+          <span class="control-label" id="l_b_set">Настройки</span>
+          <label style="font-size:9px; color:#888;">Size / Размер</label>
+          <input type="range" id="r_b_size" min="50" max="150" value="100">
+          <label style="font-size:9px; color:#888;">Opacity / Прозрачность</label>
+          <input type="range" id="r_b_op" min="0" max="100" value="100">
+           <div style="display:flex; gap:5px; margin-top:5px; align-items:center;">
+             <label style="font-size:9px; color:#888;">Glow:</label>
+             <input type="color" id="c_b_glow" value="#ff0055" style="border:none; width:20px; height:20px; background:none; padding:0;">
+             <input type="range" id="r_b_glow" min="0" max="50" value="0">
+          </div>
+        </div>
+      </div>
+
+      <!-- КВЕСТ -->
+      <div class="tab-content" id="p_quest">
+        <!-- Фон -->
+        <div class="control-group">
+            <span class="control-label" id="l_bg">Фон игры</span>
+            <button class="fx-btn" style="width:100%" onclick="document.getElementById('f_bg').click()" id="b_bg_up">ЗАГРУЗИТЬ ФОН</button>
+            <input type="file" id="f_bg" hidden accept="image/*">
+        </div>
+
+        <!-- Таймер -->
+        <div class="control-group">
+            <div class="toggle-row">
+                <span class="control-label" style="margin:0" id="l_timer">Таймер (мин)</span>
+                <input type="checkbox" id="chk_timer">
+            </div>
+            <input type="range" id="r_timer" min="1" max="30" value="5">
+            <div style="text-align:right; font-size:10px; color:var(--cyan);"><span id="val_timer">5</span> min</div>
+        </div>
+
+        <!-- Тип задания -->
+        <div class="control-group">
+            <span class="control-label" id="l_q_type">Тип задания</span>
+            <div class="type-switch">
+                <div class="type-btn active" onclick="app.setQType('choice')" id="b_choice">ВЫБОР</div>
+                <div class="type-btn" onclick="app.setQType('input')" id="b_input">ВВОД</div>
+            </div>
+            
+            <span class="control-label" id="l_q_txt">Текст вопроса</span>
+            <textarea class="fx-textarea" id="i_q_text" rows="2">Сколько будет 2 + 2?</textarea>
+
+            <!-- Поля для ВЫБОРА -->
+            <div id="area_choice">
+                <span class="control-label" style="color:var(--green)" id="l_corr">Верный ответ</span>
+                <input type="text" class="fx-input" id="i_c_ans" value="4">
+                <span class="control-label" style="color:var(--pink)" id="l_wr">Неверные ответы</span>
+                <input type="text" class="fx-input" id="i_w1" value="5">
+                <input type="text" class="fx-input" id="i_w2" value="22">
+            </div>
+
+            <!-- Поля для ВВОДА -->
+            <div id="area_input" style="display:none">
+                <span class="control-label" style="color:var(--green)" id="l_code">Правильный текст</span>
+                <input type="text" class="fx-input" id="i_in_ans" value="4">
+                <div style="font-size:9px; color:#666; margin-top:2px;">* Регистр не важен</div>
+            </div>
+        </div>
+        
+        <div class="control-group">
+             <span class="control-label" id="l_win">Сообщение Победы</span>
+             <input type="text" class="fx-input" id="i_win_msg" value="VICTORY!">
+        </div>
+      </div>
+
+    </div>
+
+    <!-- СЦЕНА -->
+    <div class="stage" id="stage_bg">
+      <div class="stage-overlay"></div>
+      <div class="battle-preview">
+         <div class="char-box" id="box_hero">
+             <img src="https://cdn-icons-png.flaticon.com/512/3408/3408506.png" class="char-img" id="img_hero">
+         </div>
+         <div class="char-box" id="box_boss">
+             <img src="https://cdn-icons-png.flaticon.com/512/2312/2312264.png" class="char-img" id="img_boss" style="filter: hue-rotate(-20deg);">
+         </div>
+      </div>
+
+      <div class="code-dock">
+          <button class="btn-generate" onclick="app.generate()" id="b_gen">СГЕНЕРИРОВАТЬ КОД</button>
+      </div>
+    </div>
+    
+    <textarea id="hidden_code"></textarea>
+
+  </div>
+
+  <script>
+    const app = {
+      lang: 'en',
+      qType: 'choice',
+      data: {
+         hero: { src: 'https://cdn-icons-png.flaticon.com/512/3408/3408506.png', anim: 'idle', size: 100, op: 100, gC: '#00e5ff', gP: 0 },
+         boss: { src: 'https://cdn-icons-png.flaticon.com/512/2312/2312264.png', anim: 'idle', size: 100, op: 100, gC: '#ff0055', gP: 0 },
+         bg: '',
+         timer: 5,
+         timerOn: false
+      },
+      text: {
+        ru: {
+          tabs: ['ГЕРОЙ', 'БОСС', 'КВЕСТ'],
+          lbls: ['Имя', 'Загрузить картинку', 'Анимация', 'Настройки', 'Загрузить фон', 'Таймер (мин)', 'Тип задания', 'Текст вопроса', 'Верный ответ', 'Неверные ответы', 'Правильный текст', 'Сообщение Победы'],
+          btns: ['ВЫБОР', 'ВВОД', 'СГЕНЕРИРОВАТЬ КОД']
+        },
+        en: {
+          tabs: ['HERO', 'BOSS', 'QUEST'],
+          lbls: ['Name', 'Upload Image', 'Animation', 'Settings', 'Upload Background', 'Timer (min)', 'Quest Type', 'Question Text', 'Correct Answer', 'Wrong Answers', 'Correct Text', 'Win Message'],
+          btns: ['CHOICE', 'INPUT', 'GENERATE CODE']
+        }
+      },
+      anims: ['none','idle','float','pulse','shake','glitch','spin','neon','wobble','swing','bounce','flip','ghost'],
+
+      init() {
+        this.renderAnims('hero');
+        this.renderAnims('boss');
+        this.bindEvents();
+      },
+
+      setLang(l) {
+        this.lang = l;
+        document.getElementById('view_landing').classList.add('hidden');
+        document.getElementById('view_editor').classList.add('visible');
+        this.translate();
+      },
+
+      translate() {
+        const t = this.text[this.lang];
+        const e = (id, txt) => document.getElementById(id).innerText = txt;
+        
+        e('t_hero', t.tabs[0]); e('t_boss', t.tabs[1]); e('t_quest', t.tabs[2]);
+        
+        ['l_h_name','l_b_name'].forEach(i => e(i, t.lbls[0]));
+        ['b_h_up','b_b_up'].forEach(i => e(i, t.lbls[1]));
+        ['l_h_anim','l_b_anim'].forEach(i => e(i, t.lbls[2]));
+        ['l_h_set','l_b_set'].forEach(i => e(i, t.lbls[3]));
+        
+        e('l_bg', t.lbls[4]); e('b_bg_up', t.lbls[4]);
+        e('l_timer', t.lbls[5]); e('l_q_type', t.lbls[6]); e('l_q_txt', t.lbls[7]);
+        e('l_corr', t.lbls[8]); e('l_wr', t.lbls[9]); e('l_code', t.lbls[10]); e('l_win', t.lbls[11]);
+        
+        e('b_choice', t.btns[0]); e('b_input', t.btns[1]); e('b_gen', t.btns[2]);
+      },
+
+      tab(t) {
+        document.querySelectorAll('.tab-link').forEach(b => b.classList.remove('active'));
+        document.querySelectorAll('.tab-content').forEach(p => p.classList.remove('show'));
+        document.getElementById('t_'+t).classList.add('active');
+        document.getElementById('p_'+t).classList.add('show');
+      },
+
+      setQType(t) {
+        this.qType = t;
+        document.getElementById('b_choice').className = t==='choice'?'type-btn active':'type-btn';
+        document.getElementById('b_input').className = t==='input'?'type-btn active':'type-btn';
+        document.getElementById('area_choice').style.display = t==='choice'?'block':'none';
+        document.getElementById('area_input').style.display = t==='input'?'block':'none';
+      },
+
+      renderAnims(target) {
+        const grid = document.getElementById('ag_'+target);
+        grid.innerHTML = '';
+        this.anims.forEach(a => {
+           const b = document.createElement('div');
+           b.className = 'fx-btn' + (this.data[target].anim === a ? ' active' : '');
+           b.innerText = a;
+           b.onclick = () => {
+             this.data[target].anim = a;
+             this.renderAnims(target);
+             this.updatePreview();
+           };
+           grid.appendChild(b);
+        });
+      },
+
+      handleImage(file, target, isBg = false) {
+        if(file) {
+           const r = new FileReader();
+           r.onload = (e) => {
+             if(isBg) { 
+                 this.data.bg = e.target.result; 
+                 document.getElementById('u_boss').classList.remove('upload-success'); 
+             }
+             else { 
+                 this.data[target].src = e.target.result;
+                 // Подсветка поля URL или Кнопки (визуально)
+                 const btnId = isBg ? 'b_bg_up' : (target==='hero'?'b_h_up':'b_b_up');
+                 const btn = document.getElementById(btnId);
+                 btn.classList.add('upload-success');
+                 setTimeout(()=>btn.classList.remove('upload-success'), 1000);
+             }
+             this.updatePreview();
+           };
+           r.readAsDataURL(file);
+        }
+      },
+
+      bindEvents() {
+         // File Uploads
+         document.getElementById('f_hero').onchange = (e) => this.handleImage(e.target.files[0], 'hero');
+         document.getElementById('f_boss').onchange = (e) => this.handleImage(e.target.files[0], 'boss');
+         document.getElementById('f_bg').onchange = (e) => this.handleImage(e.target.files[0], null, true);
+         
+         // URL Inputs
+         ['hero','boss'].forEach(t => {
+             document.getElementById('u_'+t).oninput = (e) => {
+                 if(e.target.value) { 
+                     this.data[t].src = e.target.value; 
+                     e.target.classList.add('upload-success');
+                     this.updatePreview(); 
+                 }
+             };
+         });
+
+         // Sliders
+         const bindS = (id, target, key) => document.getElementById(id).oninput = (e) => { this.data[target][key] = e.target.value; this.updatePreview(); };
+         
+         bindS('r_h_size','hero','size'); bindS('r_h_op','hero','op'); bindS('r_h_glow','hero','gP');
+         bindS('r_b_size','boss','size'); bindS('r_b_op','boss','op'); bindS('r_b_glow','boss','gP');
+         
+         document.getElementById('c_h_glow').oninput = (e) => { this.data.hero.gC = e.target.value; this.updatePreview(); };
+         document.getElementById('c_b_glow').oninput = (e) => { this.data.boss.gC = e.target.value; this.updatePreview(); };
+
+         // Timer
+         document.getElementById('chk_timer').onchange = (e) => this.data.timerOn = e.target.checked;
+         document.getElementById('r_timer').oninput = (e) => {
+             this.data.timer = e.target.value;
+             document.getElementById('val_timer').innerText = e.target.value;
+         }
+      },
+
+      updatePreview() {
+         const h = this.data.hero;
+         const b = this.data.boss;
+         
+         // Bg
+         document.getElementById('stage_bg').style.backgroundImage = this.data.bg ? `url(${this.data.bg})` : 'none';
+
+         // Helper style applier
+         const apply = (elId, d) => {
+             const img = document.getElementById(elId);
+             img.src = d.src;
+             // Styles
+             img.parentNode.style.width = (d.size * 0.4) + '%'; // Scale box
+             img.style.opacity = d.op / 100;
+             const filter = d.gP > 0 ? `drop-shadow(0 0 ${d.gP}px ${d.gC})` : 'none';
+             img.style.filter = filter;
+             
+             // Anim
+             let dur = 2;
+             if(['shake','wobble'].includes(d.anim)) dur = 0.8;
+             if(['flip','ghost'].includes(d.anim)) dur = 3;
+             
+             let timing = d.anim === 'glitch' ? 'steps(2)' : 'ease-in-out';
+             if(['shake','spin','flip'].includes(d.anim)) timing = 'linear';
+             if(['bounce'].includes(d.anim)) timing = 'ease';
+             
+             if(d.anim !== 'none') {
+                 img.style.animation = `fx-${d.anim} ${dur}s infinite ${timing}`;
+                 if(d.anim === 'swing') img.style.transformOrigin = 'top center';
+                 else img.style.transformOrigin = 'center';
+             } else {
+                 img.style.animation = 'none';
+             }
+         };
+
+         apply('img_hero', h);
+         apply('img_boss', b);
+      },
+
+      generate() {
+         const d = this.data;
+         const qData = {
+             hName: document.getElementById('i_h_name').value,
+             bName: document.getElementById('i_b_name').value,
+             qText: document.getElementById('i_q_text').value,
+             win: document.getElementById('i_win_msg').value,
+             correct: this.qType === 'choice' ? document.getElementById('i_c_ans').value : document.getElementById('i_in_ans').value,
+             wrongs: [document.getElementById('i_w1').value, document.getElementById('i_w2').value]
+         };
+
+         // Build CSS for Animations
+         const getAnimRule = (o) => {
+             if(o.anim === 'none') return '';
+             let dur = 2;
+             if(['shake','wobble'].includes(o.anim)) dur = 0.8;
+             if(['flip','ghost'].includes(o.anim)) dur = 3;
+             let timing = o.anim === 'glitch' ? 'steps(2)' : 'ease-in-out';
+             if(['shake','spin','flip'].includes(o.anim)) timing = 'linear';
+             if(['bounce'].includes(o.anim)) timing = 'ease';
+             let origin = o.anim==='swing' ? 'transform-origin:top center;' : '';
+             return `animation: fx-${o.anim} ${dur}s infinite ${timing}; ${origin}`;
+         };
+
+         const hStyle = `width:${d.hero.size}%; opacity:${d.hero.op/100}; filter:${d.hero.gP>0?`drop-shadow(0 0 ${d.hero.gP}px ${d.hero.gC})`:''}; ${getAnimRule(d.hero)}`;
+         const bStyle = `width:${d.boss.size}%; opacity:${d.boss.op/100}; filter:${d.boss.gP>0?`drop-shadow(0 0 ${d.boss.gP}px ${d.boss.gC})`:''}; ${getAnimRule(d.boss)}`;
+
+         // Logic Script
+         const script = `
 <script>
-  /* --- ДАННЫЕ И СОСТОЯНИЕ --- */
-  const state = {
-    heroName: "Student",
-    bossName: "Boss",
-    heroImg: "https://cdn-icons-png.flaticon.com/512/3408/3408506.png", // Заглушка
-    bossImg: "https://cdn-icons-png.flaticon.com/512/2312/2312264.png", // Заглушка
-    question: "Вопрос...",
-    correct: "Ответ",
-    wrongs: ["Неверно 1", "Неверно 2"],
-    winMsg: "VICTORY!"
-  };
-
-  const text = {
-    ru: {
-      title: "БИТВА С БОССОМ",
-      tabs: ["ГЕРОЙ", "БОСС", "КВЕСТ"],
-      labels: ["Имя Героя", "Аватар Героя", "Имя Босса", "Аватар Босса", "Сообщение Победы", "Вопрос / Атака", "Верный ответ", "Неверные ответы"],
-      drop: "Нажми, чтобы загрузить файл",
-      copy: "СКОПИРОВАТЬ КОД"
-    },
-    en: {
-      title: "BOSS BATTLE",
-      tabs: ["HERO", "BOSS", "QUEST"],
-      labels: ["Hero Name", "Hero Avatar", "Boss Name", "Boss Avatar", "Win Message", "Question / Attack", "Correct Answer (Crit)", "Wrong Answers (Miss)"],
-      drop: "Click to upload file",
-      copy: "COPY CODE"
-    }
-  };
-
-  /* --- ИНИЦИАЛИЗАЦИЯ --- */
-  function init() {
-    updatePreview();
+  let timerVal = ${d.timer * 60};
+  let timerOn = ${d.timerOn};
+  
+  function startTimer() {
+    if(!timerOn) return;
+    const el = document.getElementById('timer-disp');
+    const interval = setInterval(() => {
+        timerVal--;
+        let m = Math.floor(timerVal / 60);
+        let s = timerVal % 60;
+        el.innerText = m + ':' + (s < 10 ? '0'+s : s);
+        if(timerVal <= 0) {
+            clearInterval(interval);
+            alert("TIME OVER!");
+            location.reload();
+        }
+    }, 1000);
   }
-
-  /* --- ЛОГИКА ИНТЕРФЕЙСА --- */
-  function setAppLang(lang) {
-    document.querySelectorAll('.lang-btn').forEach(b => b.classList.remove('active'));
-    event.target.classList.add('active');
-    
-    const t = text[lang];
-    document.getElementById('ui-title').innerText = t.title;
-    
-    const tabs = document.querySelectorAll('.tab-btn');
-    tabs[0].innerText = t.tabs[0];
-    tabs[1].innerText = t.tabs[1];
-    tabs[2].innerText = t.tabs[2];
-
-    document.getElementById('lbl-hero-name').innerText = t.labels[0];
-    document.getElementById('lbl-hero-img').innerText = t.labels[1];
-    document.getElementById('lbl-boss-name').innerText = t.labels[2];
-    document.getElementById('lbl-boss-img').innerText = t.labels[3];
-    document.getElementById('lbl-win-msg').innerText = t.labels[4];
-    document.getElementById('lbl-question').innerText = t.labels[5];
-    document.getElementById('lbl-correct').innerText = t.labels[6];
-    document.getElementById('lbl-wrong').innerText = t.labels[7];
-    
-    document.getElementById('txt-drop').innerText = t.drop;
-    document.getElementById('txt-drop2').innerText = t.drop;
-    document.querySelector('.btn-copy').innerText = t.copy;
+  
+  function checkChoice(btn, isCor) {
+      if(isCor) win();
+      else fail(btn);
   }
-
-  function switchTab(tabName) {
-    document.querySelectorAll('.tab-btn').forEach(b => b.classList.remove('active'));
-    document.querySelector(`.tab-btn[data-tab="${tabName}"]`).classList.add('active');
-    
-    document.querySelectorAll('.panel-content').forEach(p => p.classList.remove('active'));
-    document.getElementById(`panel-${tabName}`).classList.add('active');
+  
+  function checkInput() {
+      const val = document.getElementById('inp-ans').value.trim().toLowerCase();
+      const cor = "${qData.correct}".trim().toLowerCase();
+      if(val === cor) win();
+      else failInput();
   }
-
-  function handleUrl(input, type) {
-    if(input.value) {
-      if(type === 'hero') state.heroImg = input.value;
-      if(type === 'boss') state.bossImg = input.value;
-      updatePreview();
-    }
+  
+  function win() {
+      document.getElementById('boss-img').style.opacity = '0';
+      document.getElementById('boss-img').style.transform = 'scale(0)';
+      document.getElementById('hero-img').style.animation = 'fx-bounce 0.5s ease infinite';
+      document.getElementById('q-panel').innerHTML = "<h2 style='color:#00ff88; text-shadow:0 0 10px #00ff88'>${qData.win}</h2>";
   }
-
-  function handleFile(input, type) {
-    const file = input.files[0];
-    if (file) {
-      const reader = new FileReader();
-      reader.onload = function(e) {
-        if(type === 'hero') state.heroImg = e.target.result;
-        if(type === 'boss') state.bossImg = e.target.result;
-        updatePreview();
-      };
-      reader.readAsDataURL(file);
-    }
+  
+  function fail(el) {
+      el.style.background = '#ff0055';
+      el.style.color = '#fff';
+      document.body.style.animation = 'fx-shake 0.3s linear';
+      setTimeout(() => { 
+          el.style.background = '#444'; 
+          document.body.style.animation = 'none';
+      }, 1000);
   }
-
-  function updatePreview() {
-    // Сбор данных
-    state.heroName = document.getElementById('inp-hero-name').value;
-    state.bossName = document.getElementById('inp-boss-name').value;
-    state.winMsg = document.getElementById('inp-win-msg').value;
-    state.question = document.getElementById('inp-question').value;
-    state.correct = document.getElementById('inp-ans-cor').value;
-    
-    const wrongs = [];
-    document.querySelectorAll('.wrong-ans').forEach(inp => {
-      if(inp.value.trim() !== "") wrongs.push(inp.value);
-    });
-    state.wrongs = wrongs;
-
-    // Обновление DOM Превью
-    document.getElementById('prev-hero-name').innerText = state.heroName;
-    document.getElementById('prev-boss-name').innerText = state.bossName;
-    document.getElementById('prev-hero-img').src = state.heroImg;
-    document.getElementById('prev-boss-img').src = state.bossImg;
-    document.getElementById('prev-question').innerText = state.question;
-
-    const btnContainer = document.getElementById('prev-buttons');
-    btnContainer.innerHTML = '';
-    
-    // Создаем кнопки для превью
-    const allAns = [{txt: state.correct, cor: true}, ...state.wrongs.map(w => ({txt: w, cor: false}))];
-    allAns.forEach(a => {
-      const b = document.createElement('div');
-      b.className = 'action-btn' + (a.cor ? ' correct-preview' : '');
-      b.innerText = a.txt;
-      btnContainer.appendChild(b);
-    });
+  
+  function failInput() {
+      const i = document.getElementById('inp-ans');
+      i.style.borderColor = '#ff0055';
+      document.body.style.animation = 'fx-shake 0.3s linear';
+      setTimeout(() => { 
+          i.style.borderColor = '#fff'; 
+          document.body.style.animation = 'none';
+      }, 1000);
   }
+  
+  startTimer();
+<\/script>`;
 
-  /* --- ГЕНЕРАЦИЯ КОДА (САМОЕ ВАЖНОЕ) --- */
-  function generateAndCopy() {
-    // Собираем все ответы и перемешиваем для финальной игры
-    const answers = [
-      { t: state.correct, v: 1 },
-      ...state.wrongs.map(w => ({ t: w, v: 0 }))
-    ].sort(() => Math.random() - 0.5);
+         // Inputs UI
+         let inputHtml = '';
+         if(this.qType === 'choice') {
+             const ans = [{t:qData.correct, c:true}, {t:qData.wrongs[0], c:false}];
+             if(qData.wrongs[1]) ans.push({t:qData.wrongs[1], c:false});
+             ans.sort(()=>Math.random()-0.5);
+             inputHtml = `<div class="btns">${ans.map(a => `<button class="game-btn" onclick="checkChoice(this, ${a.c})">${a.t}</button>`).join('')}</div>`;
+         } else {
+             inputHtml = `<div class="inp-area"><input type="text" id="inp-ans" placeholder="Answer..."><button class="game-btn" onclick="checkInput()">SUBMIT</button></div>`;
+         }
 
-    // Генерируем HTML кнопки
-    let buttonsHtml = '';
-    answers.forEach(a => {
-      buttonsHtml += `<button class="game-btn" onclick="attack(${a.v})">${a.t}</button>`;
-    });
-
-    // Полный код игры, который будет внутри iframe
-    const finalHtml = `
+         const html = `
 <!DOCTYPE html>
 <html>
 <head>
-<meta charset="UTF-8">
 <style>
 @import url('https://fonts.googleapis.com/css2?family=Press+Start+2P&family=Rajdhani:wght@700&display=swap');
-body { margin:0; overflow:hidden; background:transparent; font-family:'Rajdhani',sans-serif; user-select:none; }
-#battle-scene {
-  width:100vw; height:100vh; display:flex; flex-direction:column; justify-content:space-between;
-  background:transparent; position:relative; overflow:hidden;
-}
-/* HUD */
-.hud { padding:10px 20px; display:flex; justify-content:space-between; z-index:10; }
-.unit-stat { width:40%; }
-.name { color:#fff; font-weight:800; text-shadow:2px 2px 0 #000; font-size:16px; margin-bottom:5px; text-transform:uppercase; }
-.hp-frame { width:100%; height:15px; background:#222; border:2px solid #fff; border-radius:10px; overflow:hidden; position:relative; }
-.hp-val { width:100%; height:100%; transition:width 0.5s cubic-bezier(0.175, 0.885, 0.32, 1.275); }
-#hero-hp { background:#00e5ff; box-shadow:0 0 10px #00e5ff; }
-#boss-hp { background:#ff0055; box-shadow:0 0 10px #ff0055; }
+body { margin:0; overflow:hidden; font-family:'Rajdhani',sans-serif; user-select:none; width:100vw; height:100vh;
+background: ${d.bg ? `url(${d.bg}) center/cover` : 'transparent'}; }
 
-/* SPRITES */
-.stage { flex:1; position:relative; display:flex; justify-content:space-between; align-items:flex-end; padding:0 5%; }
-.sprite { max-width:40%; max-height:80%; transition: transform 0.2s, filter 0.2s, opacity 0.5s; filter:drop-shadow(0 0 10px rgba(0,0,0,0.5)); position:relative; }
-#hero-img { animation: idle 3s ease-in-out infinite; }
-#boss-img { animation: idle 4s ease-in-out infinite reverse; }
+/* Keyframes copied from editor */
+@keyframes fx-idle { 0%,100%{transform:translateY(0)} 50%{transform:translateY(-6px)} }
+@keyframes fx-float { 0%,100%{transform:translateY(0) rotate(0deg)} 50%{transform:translateY(-15px) rotate(2deg)} }
+@keyframes fx-pulse { 0%,100%{transform:scale(1)} 50%{transform:scale(1.05)} }
+@keyframes fx-shake { 0%{transform: translate(1px, 1px)} 20%{transform: translate(-3px, 0px)} 40%{transform: translate(1px, -1px)} 60%{transform: translate(-3px, 1px)} 80%{transform: translate(-1px, -1px)} 100%{transform: translate(1px, -2px)} }
+@keyframes fx-glitch { 0%{transform: translate(0)} 20%{transform: translate(-2px, 2px)} 40%{transform: translate(-2px, -2px)} 60%{transform: translate(2px, 2px)} 80%{transform: translate(2px, -2px)} 100%{transform: translate(0)} }
+@keyframes fx-spin { 0%{transform: rotateY(0deg)} 100%{transform: rotateY(360deg)} }
+@keyframes fx-neon { 0%,100%{opacity: 1; filter: brightness(1)} 50%{opacity: 0.8; filter: brightness(1.5)} }
+@keyframes fx-wobble { 0%,100%{transform:rotate(0deg)} 25%{transform:rotate(-5deg)} 75%{transform:rotate(5deg)} }
+@keyframes fx-swing { 0%{transform:rotate(0deg)} 20%{transform:rotate(15deg)} 40%{transform:rotate(-10deg)} 60%{transform:rotate(5deg)} 80%{transform:rotate(-5deg)} 100%{transform:rotate(0deg)} }
+@keyframes fx-bounce { 0%, 20%, 50%, 80%, 100% {transform: translateY(0);} 40% {transform: translateY(-30px);} 60% {transform: translateY(-15px);} }
+@keyframes fx-flip { 0% {transform: rotateY(0);} 100% {transform: rotateY(360deg);} }
+@keyframes fx-ghost { 0%,100% { opacity: 1; transform: scale(1); } 50% { opacity: 0.4; transform: scale(1.05); } }
 
-/* MENU */
-.menu { background: linear-gradient(to top, #000 90%, transparent); padding:10px; display:flex; flex-direction:column; align-items:center; z-index:20; min-height:140px; }
-.q-box { 
-  background:rgba(0,40,80,0.9); border:2px solid #00e5ff; color:#fff; padding:10px; 
-  border-radius:8px; width:90%; text-align:center; font-size:18px; margin-bottom:10px;
-  box-shadow:0 0 15px rgba(0,229,255,0.2); font-weight:700;
-}
+.scene { display:flex; flex-direction:column; height:100%; justify-content:space-between; position:relative; }
+.hud { padding:10px; display:flex; justify-content:space-between; z-index:10; color:#fff; font-weight:900; text-shadow:2px 2px 0 #000; font-size:18px; }
+.timer { color:#ffcc00; }
+
+.stage { flex:1; display:flex; justify-content:space-between; align-items:flex-end; padding:0 10%; perspective:1000px; }
+.char-wrap { width:40%; height:80%; display:flex; align-items:flex-end; justify-content:center; }
+.char { max-width:100%; max-height:100%; object-fit:contain; transition:0.5s; }
+
+.ui-panel { background:rgba(20,20,30,0.95); padding:15px; border-top:3px solid #00e5ff; display:flex; flex-direction:column; align-items:center; gap:10px; min-height:150px; }
+.q-text { color:#fff; font-size:20px; font-weight:700; text-align:center; }
+
 .btns { display:flex; gap:10px; flex-wrap:wrap; justify-content:center; width:100%; }
-.game-btn {
-  background:#333; border:1px solid #666; color:#fff; padding:10px 20px;
-  font-family:'Rajdhani',sans-serif; font-weight:700; font-size:16px; cursor:pointer;
-  text-transform:uppercase; border-radius:4px; transition:0.1s; flex:1; min-width:120px; max-width:200px;
-}
-.game-btn:hover { background:#555; transform:translateY(-2px); border-color:#fff; }
-.game-btn:active { transform:translateY(1px); }
+.game-btn { background:#444; border:2px solid #666; color:#fff; padding:12px 20px; font-family:inherit; font-weight:700; font-size:16px; cursor:pointer; text-transform:uppercase; border-radius:6px; transition:0.2s; min-width:120px; }
+.game-btn:hover { background:#666; border-color:#fff; }
 
-/* EFFECTS */
-.dmg-text {
-  position:absolute; font-family:'Press Start 2P', cursive; font-size:20px; color:#fff;
-  text-shadow:2px 2px 0 #000; animation: floatUp 1s forwards; pointer-events:none; z-index:100;
-}
-.crit { color:#ffcc00; font-size:24px; }
-.miss { color:#aaa; font-size:16px; }
+.inp-area { display:flex; gap:10px; }
+input[type=text] { padding:10px; border-radius:4px; border:2px solid #fff; font-family:inherit; font-weight:700; background:#000; color:#fff; }
 
-/* ANIMATIONS */
-@keyframes idle { 0%,100% {transform:translateY(0)} 50% {transform:translateY(-10px)} }
-@keyframes attackRight { 0% {transform:translateX(0)} 50% {transform:translateX(100px)} 100% {transform:translateX(0)} }
-@keyframes shake { 0% {transform:translate(0,0)} 25% {transform:translate(5px,5px)} 50% {transform:translate(-5px,-5px)} 75% {transform:translate(5px,-5px)} 100% {transform:translate(0,0)} }
-@keyframes floatUp { 0% {opacity:1; transform:translateY(0) scale(1);} 100% {opacity:0; transform:translateY(-50px) scale(1.5);} }
-@keyframes flashRed { 0%,100% {filter:brightness(1) hue-rotate(0deg);} 50% {filter:brightness(2) sepia(1) hue-rotate(-50deg) saturate(5);} }
-@keyframes victoryJump { 0%,100%{transform:translateY(0)} 50%{transform:translateY(-30px)} }
 </style>
 </head>
 <body>
-<div id="battle-scene">
+<div class="scene">
   <div class="hud">
-    <div class="unit-stat">
-      <div class="name">${state.heroName}</div>
-      <div class="hp-frame"><div class="hp-val" id="hero-hp"></div></div>
-    </div>
-    <div class="unit-stat" style="text-align:right">
-      <div class="name">${state.bossName}</div>
-      <div class="hp-frame"><div class="hp-val" id="boss-hp"></div></div>
-    </div>
+    <div>${qData.hName}</div>
+    <div class="timer" id="timer-disp">${d.timerOn ? d.timer+':00' : ''}</div>
+    <div>${qData.bName}</div>
   </div>
-
+  
   <div class="stage">
-    <img src="${state.heroImg}" id="hero-img" class="sprite">
-    <img src="${state.bossImg}" id="boss-img" class="sprite">
+     <div class="char-wrap"><img src="${d.hero.src}" class="char" id="hero-img" style="${hStyle}"></div>
+     <div class="char-wrap"><img src="${d.boss.src}" class="char" id="boss-img" style="${bStyle}"></div>
   </div>
 
-  <div class="menu">
-    <div class="q-box" id="q-text">${state.question}</div>
-    <div class="btns" id="btn-container">
-      ${buttonsHtml}
-    </div>
+  <div class="ui-panel" id="q-panel">
+     <div class="q-text">${qData.qText}</div>
+     ${inputHtml}
   </div>
 </div>
-
-<script>
-  let heroHp = 100;
-  let bossHp = 100;
-  
-  function spawnText(text, x, y, type) {
-    const el = document.createElement('div');
-    el.className = 'dmg-text ' + type;
-    el.innerText = text;
-    el.style.left = x + 'px';
-    el.style.top = y + 'px';
-    document.body.appendChild(el);
-    setTimeout(() => el.remove(), 1000);
-  }
-
-  function attack(isCorrect) {
-    const hero = document.getElementById('hero-img');
-    const boss = document.getElementById('boss-img');
-    const qBox = document.getElementById('q-text');
-    const btns = document.querySelectorAll('.game-btn');
-    
-    // Блокируем кнопки
-    btns.forEach(b => b.disabled = true);
-
-    if (isCorrect) {
-      // WIN LOGIC
-      hero.style.animation = 'attackRight 0.4s ease';
-      
-      setTimeout(() => {
-        // Impact
-        boss.style.animation = 'shake 0.4s linear, flashRed 0.4s ease';
-        const rect = boss.getBoundingClientRect();
-        spawnText("-9999", rect.left + rect.width/2, rect.top, 'crit');
-        
-        document.getElementById('boss-hp').style.width = '0%';
-        
-        setTimeout(() => {
-          boss.style.opacity = '0';
-          qBox.innerHTML = "<span style='color:#00ff88'>${state.winMsg}</span>";
-          qBox.style.borderColor = "#00ff88";
-          hero.style.animation = 'victoryJump 0.8s ease infinite';
-        }, 600);
-      }, 200);
-
-    } else {
-      // LOSE LOGIC (Try Again)
-      document.body.style.animation = 'shake 0.3s linear';
-      
-      setTimeout(() => {
-        hero.style.animation = 'flashRed 0.4s ease';
-        const rect = hero.getBoundingClientRect();
-        spawnText("MISS", rect.left + rect.width/2, rect.top, 'miss');
-        
-        heroHp -= 20;
-        if(heroHp < 0) heroHp = 0;
-        document.getElementById('hero-hp').style.width = heroHp + '%';
-        
-        qBox.innerText = "MISSED! TRY AGAIN!";
-        qBox.style.color = "#ff0055";
-        qBox.style.borderColor = "#ff0055";
-
-        setTimeout(() => {
-          // Reset
-          document.body.style.animation = '';
-          hero.style.animation = 'idle 3s ease-in-out infinite';
-          qBox.style.color = "#fff";
-          qBox.style.borderColor = "#00e5ff";
-          qBox.innerText = "${state.question}";
-          btns.forEach(b => b.disabled = false);
-        }, 1500);
-      }, 100);
-    }
-  }
-<\/script>
+${script}
 </body>
 </html>`;
 
-    // Копирование
-    const buffer = document.getElementById('code-buffer');
-    // Оборачиваем в iframe для Genially
-    buffer.value = `<iframe srcdoc="${finalHtml.replace(/"/g, '&quot;')}" width="100%" height="100%" frameborder="0" style="background:transparent;"></iframe>`;
-    buffer.select();
-    document.execCommand('copy');
+         const area = document.getElementById('hidden_code');
+         area.value = `<iframe srcdoc="${html.replace(/"/g, '&quot;')}" width="100%" height="100%" frameborder="0" style="background:transparent;"></iframe>`;
+         area.select();
+         document.execCommand('copy');
+         
+         const btn = document.getElementById('b_gen');
+         const old = btn.innerText;
+         btn.innerText = "OK!";
+         btn.style.borderColor = "#00ff88";
+         btn.style.color = "#00ff88";
+         setTimeout(() => {
+             btn.innerText = old;
+             btn.style.borderColor = "#fff";
+             btn.style.color = "#fff";
+         }, 1500);
+      }
+    };
 
-    // Анимация кнопки
-    const btn = document.querySelector('.btn-copy');
-    const oldTxt = btn.innerText;
-    btn.innerText = "СКОПИРОВАНО! / COPIED!";
-    btn.style.background = "#00ff88";
-    setTimeout(() => {
-      btn.innerText = oldTxt;
-      btn.style.background = "";
-    }, 2000);
-  }
-  
-  // Старт
-  init();
-</script>
-</body>
-</html>
+    app.init();
+  </script>
+</div>

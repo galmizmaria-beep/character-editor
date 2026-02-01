@@ -1,587 +1,557 @@
 <div id="FX_ROOT">
   <style>
-    /* --- ШРИФТЫ --- */
-    @import url('https://fonts.googleapis.com/css2?family=Montserrat:wght@400;700;900&display=swap');
+    /* --- ШРИФТЫ И БАЗА --- */
+    @import url('https://fonts.googleapis.com/css2?family=Rajdhani:wght@500;600;700&family=Montserrat:wght@400;700;900&display=swap');
 
-    /* --- CSS ПЕРЕМЕННЫЕ --- */
     #FX_ROOT {
       --bg-dark: #050505;
-      --bg-panel: #141419;
-      --primary: #ff0055;
-      --secondary: #00e5ff;
-      --success: #00ff88;
-      --text-main: #ffffff;
-      --text-muted: #888;
-      --border: rgba(255, 255, 255, 0.1);
+      --bg-panel: rgba(16, 16, 20, 0.95);
+      --primary: #00e5ff; /* Cyan */
+      --accent: #ff0055;  /* Pink */
+      --success: #00ff88; /* Green */
+      --text: #ffffff;
+      --border: rgba(255, 255, 255, 0.15);
       
-      width: 100%;
-      height: 100%;
+      width: 100%; height: 100%;
       font-family: 'Montserrat', sans-serif;
-      background-color: var(--bg-dark);
-      background-image: radial-gradient(circle at 50% 50%, #1a0b10 0%, #000 100%);
-      color: var(--text-main);
-      overflow: hidden; /* Глобально убираем скролл приложения */
-      position: relative;
-      display: flex;
-      flex-direction: column;
-    }
-
-    #FX_ROOT * { box-sizing: border-box; outline: none; }
-
-    /* Скроллбар внутри панелей */
-    #FX_ROOT ::-webkit-scrollbar { width: 4px; }
-    #FX_ROOT ::-webkit-scrollbar-track { background: transparent; }
-    #FX_ROOT ::-webkit-scrollbar-thumb { background: var(--border); border-radius: 2px; }
-
-    /* --- ГЛАВНАЯ (LANDING) --- */
-    #FX_ROOT .landing-view {
-      position: absolute;
-      top: 0; left: 0; width: 100%; height: 100%;
-      display: flex;
-      flex-direction: column;
-      align-items: center;
-      justify-content: center;
-      z-index: 20;
       background: var(--bg-dark);
-      transition: transform 0.6s cubic-bezier(0.7, 0, 0.3, 1), opacity 0.5s;
+      background-image: 
+        radial-gradient(circle at 10% 20%, rgba(0, 229, 255, 0.1) 0%, transparent 40%),
+        radial-gradient(circle at 90% 80%, rgba(255, 0, 85, 0.1) 0%, transparent 40%);
+      color: var(--text);
+      overflow: hidden;
+      position: relative;
+      display: flex; flex-direction: column;
     }
-    #FX_ROOT .landing-view.hidden {
-      transform: translateY(-100%);
-      pointer-events: none;
-      opacity: 0;
-    }
+    
+    #FX_ROOT * { box-sizing: border-box; user-select: none; }
+    
+    /* Скроллбар */
+    #FX_ROOT ::-webkit-scrollbar { width: 4px; }
+    #FX_ROOT ::-webkit-scrollbar-track { background: #000; }
+    #FX_ROOT ::-webkit-scrollbar-thumb { background: var(--primary); border-radius: 2px; }
 
-    #FX_ROOT .landing-title {
-      font-size: 70px;
-      line-height: 1;
-      font-weight: 900;
-      text-transform: uppercase;
-      text-align: center;
-      color: #fff;
-      text-shadow: 0 0 20px rgba(0, 229, 255, 0.3);
-      margin-bottom: 50px;
-      letter-spacing: 2px;
-    }
-
-    #FX_ROOT .btn-hero {
-      padding: 20px 50px;
-      font-size: 18px;
-      font-weight: 800;
-      letter-spacing: 2px;
-      text-transform: uppercase;
-      color: #fff;
-      background: var(--primary);
-      border: none;
-      border-radius: 50px;
+    /* --- UI КОМПОНЕНТЫ --- */
+    .fx-btn {
+      background: rgba(255,255,255,0.05);
+      border: 1px solid var(--border);
+      color: var(--text);
+      padding: 10px 15px;
       cursor: pointer;
-      box-shadow: 0 0 20px rgba(255, 0, 85, 0.4);
+      font-family: 'Rajdhani', sans-serif;
+      font-weight: 700;
+      text-transform: uppercase;
+      transition: 0.2s;
+      border-radius: 4px;
+      letter-spacing: 1px;
+    }
+    .fx-btn:hover { border-color: var(--primary); color: var(--primary); background: rgba(0, 229, 255, 0.1); }
+    .fx-btn.active { background: var(--primary); color: #000; border-color: var(--primary); box-shadow: 0 0 15px rgba(0,229,255,0.4); }
+    
+    .fx-input {
+      background: #000; border: 1px solid var(--border); color: #fff;
+      padding: 8px; width: 100%; font-size: 11px; border-radius: 4px;
+      font-family: monospace; transition: 0.3s;
+    }
+    .fx-input:focus { border-color: var(--primary); }
+
+    /* --- ЛАНДИНГ (ЯЗЫК) --- */
+    .view-landing {
+      position: absolute; inset: 0; z-index: 50;
+      background: var(--bg-dark);
+      display: flex; flex-direction: column; align-items: center; justify-content: center;
+      transition: transform 0.6s cubic-bezier(0.7,0,0.3,1);
+    }
+    .view-landing.hidden { transform: translateY(-100%); pointer-events: none; }
+    
+    .landing-title { font-size: 4rem; font-weight: 900; line-height: 1; margin-bottom: 40px; text-align: center; text-transform: uppercase; letter-spacing: 4px; }
+    .landing-title span { color: var(--primary); }
+    
+    .lang-select { display: flex; gap: 20px; }
+    .btn-lang {
+      width: 120px; height: 120px; border-radius: 12px;
+      border: 2px solid var(--border); background: rgba(255,255,255,0.05);
+      font-size: 24px; font-weight: 900; color: #fff; cursor: pointer;
+      display: flex; flex-direction: column; align-items: center; justify-content: center; gap: 10px;
       transition: 0.3s;
     }
-    #FX_ROOT .btn-hero:hover {
-      box-shadow: 0 0 40px rgba(255, 0, 85, 0.8);
-      transform: scale(1.05);
+    .btn-lang:hover { border-color: var(--accent); background: rgba(255, 0, 85, 0.1); transform: scale(1.05); }
+
+    /* --- РЕДАКТОР --- */
+    .view-editor {
+      flex: 1; display: flex; opacity: 0; transition: opacity 1s 0.5s; pointer-events: none;
+    }
+    .view-editor.visible { opacity: 1; pointer-events: auto; }
+
+    /* Sidebar (Left) */
+    .sidebar {
+      width: 320px; background: var(--bg-panel); border-right: 1px solid var(--border);
+      display: flex; flex-direction: column; z-index: 10;
+    }
+    
+    .tabs-header { display: flex; border-bottom: 1px solid var(--border); }
+    .tab-link {
+      flex: 1; padding: 15px; text-align: center; background: transparent; border: none;
+      color: var(--text-muted); font-weight: 800; text-transform: uppercase; cursor: pointer;
+      font-size: 12px; transition: 0.3s;
+    }
+    .tab-link.active { color: var(--primary); background: rgba(0, 229, 255, 0.05); border-bottom: 2px solid var(--primary); }
+
+    .tab-content { padding: 20px; overflow-y: auto; display: none; flex-direction: column; gap: 20px; height: 100%; }
+    .tab-content.show { display: flex; }
+
+    .control-group { background: rgba(0,0,0,0.3); padding: 15px; border-radius: 8px; border: 1px solid var(--border); }
+    .control-label { font-size: 10px; text-transform: uppercase; color: var(--primary); margin-bottom: 8px; font-weight: 700; display: block; }
+
+    /* Grid for animations */
+    .anim-grid { display: grid; grid-template-columns: 1fr 1fr; gap: 5px; }
+
+    /* Main Stage (Right) */
+    .stage {
+      flex: 1; position: relative; background: #08080a;
+      background-image: linear-gradient(rgba(255,255,255,0.03) 1px, transparent 1px), linear-gradient(90deg, rgba(255,255,255,0.03) 1px, transparent 1px);
+      background-size: 40px 40px;
+      display: flex; align-items: center; justify-content: center;
+      overflow: hidden;
     }
 
-    /* --- РЕДАКТОР (EDITOR) --- */
-    #FX_ROOT .editor-view {
-      width: 100%; height: 100%;
-      display: flex;
-      flex-direction: column;
-      opacity: 0;
-      transition: opacity 1s 0.5s;
-    }
-    #FX_ROOT .editor-view.visible { opacity: 1; }
-
-    #FX_ROOT .editor-header {
-      height: 50px;
-      display: flex;
-      justify-content: space-between;
-      align-items: center;
-      padding: 0 20px;
-      border-bottom: 1px solid var(--border);
-      background: rgba(0,0,0,0.3);
-      flex-shrink: 0;
-    }
-    #FX_ROOT .editor-logo { font-weight: 800; text-transform: uppercase; letter-spacing: 1px; font-size: 14px; }
-    #FX_ROOT .btn-back {
-      background: none; border: none; color: var(--text-muted);
-      cursor: pointer; font-weight: 700; text-transform: uppercase; font-size: 11px;
-      transition: 0.2s;
-    }
-    #FX_ROOT .btn-back:hover { color: #fff; }
-
-    /* Layout */
-    #FX_ROOT .editor-layout {
-      flex: 1;
-      display: flex;
-      overflow: hidden; /* Важно! */
-    }
-
-    /* Sidebar */
-    #FX_ROOT .sidebar {
-      width: 340px; /* Чуть шире */
-      background: var(--bg-panel);
-      border-right: 1px solid var(--border);
-      display: flex;
-      flex-direction: column;
-      padding: 20px;
-      overflow-y: auto;
-      gap: 15px;
-      flex-shrink: 0;
-      z-index: 10;
-    }
-
-    /* Preview Area */
-    #FX_ROOT .preview-area {
-      flex: 1;
+    /* Персонаж на сцене */
+    .char-container {
       position: relative;
-      background-color: #08080a;
-      /* Сетка */
-      background-image: 
-        linear-gradient(rgba(255,255,255,0.03) 1px, transparent 1px),
-        linear-gradient(90deg, rgba(255,255,255,0.03) 1px, transparent 1px);
-      background-size: 30px 30px;
-      display: flex;
-      flex-direction: column;
-      align-items: center;
-      justify-content: center;
-      overflow: hidden; /* Убирает скролл в превью */
+      transition: transform 0.2s;
+      max-width: 80%; max-height: 80%;
+      display: flex; justify-content: center; align-items: center;
+    }
+    .char-img {
+      max-height: 60vh; max-width: 100%; object-fit: contain; display: block;
+      filter: drop-shadow(0 0 0 transparent); transition: filter 0.3s;
+    }
+    .char-placeholder {
+      width: 200px; height: 300px; border: 2px dashed var(--border);
+      display: flex; align-items: center; justify-content: center;
+      color: var(--border); text-transform: uppercase; font-size: 12px; text-align: center;
     }
 
-    /* Controls Styles */
-    #FX_ROOT .group-title {
-      font-size: 10px; text-transform: uppercase;
-      color: var(--secondary); margin-bottom: 8px; font-weight: 800; letter-spacing: 1px;
+    /* Плашка с кодом (внизу по центру) */
+    .code-dock {
+      position: absolute; bottom: 30px; left: 50%; transform: translateX(-50%);
+      z-index: 20; display: flex; flex-direction: column; align-items: center; gap: 10px;
     }
-    #FX_ROOT .control-box {
-      background: rgba(255,255,255,0.03);
-      padding: 12px;
-      border-radius: 8px;
-      border: 1px solid var(--border);
-    }
-
-    /* Upload */
-    #FX_ROOT .file-upload-wrap {
+    .btn-copy-main {
+      background: #fff; color: #000; padding: 15px 40px; font-size: 16px;
+      font-weight: 900; text-transform: uppercase; border: none; border-radius: 50px;
+      cursor: pointer; box-shadow: 0 0 20px rgba(255,255,255,0.2); transition: 0.3s;
       display: flex; align-items: center; gap: 10px;
     }
-    #FX_ROOT .btn-upload {
-      flex: 1;
-      background: rgba(255,255,255,0.08);
-      border: 1px dashed var(--border);
-      color: #fff; padding: 10px; border-radius: 6px;
-      cursor: pointer; font-size: 11px; text-align: center;
-      transition: 0.2s;
+    .btn-copy-main:hover { background: var(--primary); box-shadow: 0 0 40px var(--primary); transform: scale(1.05); }
+    .btn-copy-main span { font-size: 20px; } /* icon */
+    
+    /* Скрытый Textarea */
+    #hidden_code { opacity: 0; position: absolute; pointer-events: none; }
+
+    /* Custom Range */
+    input[type=range] { -webkit-appearance: none; width: 100%; background: transparent; }
+    input[type=range]::-webkit-slider-thumb {
+      -webkit-appearance: none; height: 16px; width: 16px; border-radius: 50%;
+      background: var(--primary); margin-top: -6px; cursor: pointer; border: 2px solid #fff;
     }
-    #FX_ROOT .btn-upload:hover { border-color: var(--secondary); color: var(--secondary); }
-    #FX_ROOT .success-mark {
-      color: var(--success); font-size: 18px; opacity: 0; transform: scale(0.5);
-      transition: 0.3s;
-    }
-    #FX_ROOT .success-mark.show { opacity: 1; transform: scale(1); }
-    #FX_ROOT input[type="file"] { display: none; }
-    #FX_ROOT input[type="text"] {
-      width: 100%; background: #000; border: 1px solid var(--border);
-      color: #fff; padding: 6px; border-radius: 4px; font-size: 10px; margin-top: 5px;
+    input[type=range]::-webkit-slider-runnable-track {
+      width: 100%; height: 4px; cursor: pointer; background: rgba(255,255,255,0.1); border-radius: 2px;
     }
 
-    /* Animation Grid */
-    #FX_ROOT .anim-grid {
-      display: grid; grid-template-columns: 1fr 1fr; gap: 4px;
-    }
-    #FX_ROOT .anim-btn {
-      background: rgba(255,255,255,0.05); border: 1px solid transparent;
-      color: var(--text-muted); padding: 8px 4px; font-size: 9px; text-transform: uppercase;
-      cursor: pointer; border-radius: 4px; transition: 0.2s; text-align: center; font-weight: 700;
-    }
-    #FX_ROOT .anim-btn:hover { background: rgba(255,255,255,0.1); color: #fff; }
-    #FX_ROOT .anim-btn.active {
-      background: rgba(0, 229, 255, 0.15); color: var(--secondary); border-color: var(--secondary);
-    }
-
-    /* Sliders */
-    #FX_ROOT input[type="range"] {
-      width: 100%; -webkit-appearance: none; height: 3px; background: rgba(255,255,255,0.1);
-      border-radius: 2px; margin: 8px 0;
-    }
-    #FX_ROOT input[type="range"]::-webkit-slider-thumb {
-      -webkit-appearance: none; width: 14px; height: 14px; background: var(--secondary);
-      border-radius: 50%; cursor: pointer;
-    }
-
-    /* Character Preview */
-    #FX_ROOT .char-wrapper {
-        width: 100%;
-        height: 100%;
-        display: flex;
-        align-items: center;
-        justify-content: center;
-        /* Важно: ограничиваем область */
-        overflow: hidden; 
-    }
-    #FX_ROOT .char-img {
-      max-height: 60vh; /* ОГРАНИЧЕНИЕ: картинка не будет гигантской */
-      max-width: 90%;
-      object-fit: contain;
-      display: block;
-      /* Добавляем transition для плавного изменения размера */
-      transition: transform 0.1s;
-    }
-    #FX_ROOT .char-placeholder {
-      color: var(--border); font-size: 12px; text-transform: uppercase;
-      border: 2px dashed var(--border); padding: 40px; border-radius: 10px;
-    }
-
-    /* Bottom Bar & Copy Button */
-    #FX_ROOT .bottom-bar {
-      position: absolute;
-      bottom: 30px;
-      left: 50%;
-      transform: translateX(-50%);
-      z-index: 50;
-      display: flex;
-      flex-direction: column;
-      align-items: center;
-      gap: 10px;
-    }
-
-    #FX_ROOT .btn-copy {
-      background: var(--text-main);
-      color: #000;
-      border: none;
-      padding: 12px 30px;
-      font-weight: 900;
-      font-size: 14px;
-      text-transform: uppercase;
-      letter-spacing: 1px;
-      cursor: pointer;
-      border-radius: 30px;
-      box-shadow: 0 10px 20px rgba(0,0,0,0.5);
-      transition: 0.3s;
-      min-width: 200px;
-      text-align: center;
-    }
-    #FX_ROOT .btn-copy:hover {
-      background: var(--secondary);
-      box-shadow: 0 10px 30px rgba(0, 229, 255, 0.3);
-      transform: translateY(-2px);
-    }
-    /* Скрытое поле кода (нужно для копирования) */
-    #FX_ROOT .hidden-code {
-      position: absolute; opacity: 0; pointer-events: none;
-    }
-
-    /* АДАПТИВНОСТЬ */
-    @media (max-width: 900px) {
-      #FX_ROOT .editor-layout { flex-direction: column-reverse; }
-      #FX_ROOT .sidebar { width: 100%; height: 45%; }
-      #FX_ROOT .preview-area { height: 55%; }
-      #FX_ROOT .char-img { max-height: 40vh; }
-      #FX_ROOT .btn-copy { padding: 10px 20px; font-size: 12px; bottom: 10px; }
-    }
-
-    /* --- КЛЮЧЕВЫЕ КАДРЫ (KEYFRAMES) --- */
+    /* --- АНИМАЦИИ CSS (ВСТРАИВАЕМЫЕ) --- */
     @keyframes fx-idle { 0%,100% {transform:translateY(0)} 50% {transform:translateY(-6px)} }
     @keyframes fx-float { 0%,100% {transform:translateY(0) rotate(0deg)} 50% {transform:translateY(-15px) rotate(2deg)} }
     @keyframes fx-pulse { 0%,100% {transform:scale(1)} 50% {transform:scale(1.05)} }
     @keyframes fx-shake { 0% {transform: translate(1px, 1px)} 20% {transform: translate(-3px, 0px)} 40% {transform: translate(1px, -1px)} 60% {transform: translate(-3px, 1px)} 80% {transform: translate(-1px, -1px)} 100% {transform: translate(1px, -2px)} }
     @keyframes fx-glitch { 0% {transform: translate(0)} 20% {transform: translate(-2px, 2px)} 40% {transform: translate(-2px, -2px)} 60% {transform: translate(2px, 2px)} 80% {transform: translate(2px, -2px)} 100% {transform: translate(0)} }
-    @keyframes fx-spin { 0% {transform: rotate(0deg)} 100% {transform: rotate(360deg)} }
+    @keyframes fx-spin { 0% {transform: rotateY(0deg)} 100% {transform: rotateY(360deg)} }
     @keyframes fx-neon { 0%,100% {opacity: 1; filter: brightness(1)} 50% {opacity: 0.8; filter: brightness(1.5)} }
-    /* Новые анимации */
-    @keyframes fx-wobble { 0%,100%{transform:translateX(0%) rotate(0deg)} 15%{transform:translateX(-5px) rotate(-3deg)} 30%{transform:translateX(3px) rotate(3deg)} 45%{transform:translateX(-3px) rotate(-2deg)} 60%{transform:translateX(2px) rotate(1deg)} 75%{transform:translateX(-1px) rotate(-1deg)} }
-    @keyframes fx-swing { 20% {transform: rotate(5deg);} 40% {transform: rotate(-3deg);} 60% {transform: rotate(2deg);} 80% {transform: rotate(-1deg);} 0%, 100% {transform: rotate(0deg);} }
-    @keyframes fx-bounce { 0%, 20%, 50%, 80%, 100% {transform: translateY(0);} 40% {transform: translateY(-20px);} 60% {transform: translateY(-10px);} }
-    @keyframes fx-flip { 0% {transform: perspective(400px) rotateY(0);} 100% {transform: perspective(400px) rotateY(360deg);} }
-    @keyframes fx-ghost { 0%,100% { opacity: var(--op); transform: scale(1); } 50% { opacity: calc(var(--op) * 0.5); transform: scale(1.05); } }
+    /* Новые */
+    @keyframes fx-wobble { 0%,100%{transform:rotate(0deg)} 25%{transform:rotate(-5deg)} 75%{transform:rotate(5deg)} }
+    @keyframes fx-swing { 0%{transform:rotate(0deg)} 20%{transform:rotate(15deg)} 40%{transform:rotate(-10deg)} 60%{transform:rotate(5deg)} 80%{transform:rotate(-5deg)} 100%{transform:rotate(0deg)} }
+    @keyframes fx-bounce { 0%, 20%, 50%, 80%, 100% {transform: translateY(0);} 40% {transform: translateY(-30px);} 60% {transform: translateY(-15px);} }
+    @keyframes fx-flip { 0% {transform: rotateY(0);} 100% {transform: rotateY(360deg);} }
+    @keyframes fx-ghost { 0%,100% { opacity: 1; transform: scale(1); } 50% { opacity: 0.4; transform: scale(1.05); } }
 
     /* Классы для JS превью */
-    #FX_ROOT .anim-idle { animation: fx-idle var(--dur) ease-in-out infinite; }
-    #FX_ROOT .anim-float { animation: fx-float var(--dur) ease-in-out infinite; }
-    #FX_ROOT .anim-pulse { animation: fx-pulse var(--dur) ease-in-out infinite; }
-    #FX_ROOT .anim-shake { animation: fx-shake var(--dur) linear infinite; }
-    #FX_ROOT .anim-glitch { animation: fx-glitch var(--dur) steps(2) infinite; }
-    #FX_ROOT .anim-spin { animation: fx-spin var(--dur) linear infinite; }
-    #FX_ROOT .anim-neon { animation: fx-neon var(--dur) steps(3) infinite; }
-    /* Классы для новых анимаций */
-    #FX_ROOT .anim-wobble { animation: fx-wobble var(--dur) ease-in-out infinite; }
-    #FX_ROOT .anim-swing { transform-origin: top center; animation: fx-swing var(--dur) ease-in-out infinite; }
-    #FX_ROOT .anim-bounce { animation: fx-bounce var(--dur) ease infinite; }
-    #FX_ROOT .anim-flip { animation: fx-flip var(--dur) linear infinite; }
-    #FX_ROOT .anim-ghost { animation: fx-ghost var(--dur) ease-in-out infinite; }
+    .anim-idle { animation: fx-idle var(--dur) ease-in-out infinite; }
+    .anim-float { animation: fx-float var(--dur) ease-in-out infinite; }
+    .anim-pulse { animation: fx-pulse var(--dur) ease-in-out infinite; }
+    .anim-shake { animation: fx-shake var(--dur) linear infinite; }
+    .anim-glitch { animation: fx-glitch var(--dur) steps(2) infinite; }
+    .anim-spin { animation: fx-spin var(--dur) linear infinite; }
+    .anim-neon { animation: fx-neon var(--dur) steps(3) infinite; }
+    .anim-wobble { animation: fx-wobble var(--dur) ease-in-out infinite; }
+    .anim-swing { transform-origin: top center; animation: fx-swing var(--dur) ease-in-out infinite; }
+    .anim-bounce { animation: fx-bounce var(--dur) ease infinite; }
+    .anim-flip { animation: fx-flip var(--dur) linear infinite; }
+    .anim-ghost { animation: fx-ghost var(--dur) ease-in-out infinite; }
 
   </style>
 
-  <!-- LANDING PAGE -->
-  <div class="landing-view" id="fx_landing">
-    <div class="landing-title">CHARACTER<br>EFFECTS</div>
-    <button class="btn-hero" id="fx_btn_start">СОЗДАТЬ ГЕРОЯ</button>
+  <!-- ЭКРАН 1: ВЫБОР ЯЗЫКА -->
+  <div class="view-landing" id="view_landing">
+    <div class="landing-title">GAME<br><span>EDITOR</span></div>
+    <div class="lang-select">
+      <div class="btn-lang" onclick="app.setLang('ru')">RU</div>
+      <div class="btn-lang" onclick="app.setLang('en')">EN</div>
+    </div>
   </div>
 
-  <!-- EDITOR PAGE -->
-  <div class="editor-view" id="fx_editor">
-    <div class="editor-header">
-      <div class="editor-logo">FX <span>GENIALY</span></div>
-      <button class="btn-back" id="fx_btn_back">← На главную</button>
-    </div>
+  <!-- ЭКРАН 2: РЕДАКТОР -->
+  <div class="view-editor" id="view_editor">
+    
+    <!-- ЛЕВАЯ ПАНЕЛЬ -->
+    <div class="sidebar">
+      <div class="tabs-header">
+        <button class="tab-link active" onclick="app.tab('hero')" id="tab_hero">ГЕРОЙ</button>
+        <button class="tab-link" onclick="app.tab('quest')" id="tab_quest">КВЕСТ</button>
+      </div>
 
-    <div class="editor-layout">
-      <!-- SIDEBAR -->
-      <div class="sidebar">
-        <!-- Upload -->
-        <div class="control-box">
-          <div class="group-title">1. Загрузка</div>
-          <div class="file-upload-wrap">
-            <label class="btn-upload">
-              Выбрать файл
-              <input type="file" id="fx_file_input" accept="image/*">
-            </label>
-            <div class="success-mark" id="fx_upload_success">✔</div>
-          </div>
-          <div style="margin-top:8px; font-size:9px; color:var(--text-muted); text-align:center;">Или ссылка (URL):</div>
-          <input type="text" id="fx_img_url" placeholder="https://...">
+      <!-- ВКЛАДКА: ГЕРОЙ -->
+      <div class="tab-content show" id="panel_hero">
+        <div class="control-group">
+          <span class="control-label" id="lbl_upload">Загрузка Изображения</span>
+          <input type="file" id="inp_file" accept="image/*" style="display:none">
+          <button class="fx-btn" onclick="document.getElementById('inp_file').click()" style="width:100%" id="btn_upload">ВЫБРАТЬ ФАЙЛ</button>
+          <div style="margin-top:5px; text-align:center; font-size:10px; color:#555;">OR URL</div>
+          <input type="text" class="fx-input" id="inp_url" placeholder="http://...">
         </div>
 
-        <!-- Animations -->
-        <div class="control-box">
-          <div class="group-title">2. Анимация</div>
-          <div class="anim-grid">
-            <div class="anim-btn active" data-anim="none">Нет</div>
-            <div class="anim-btn" data-anim="idle">Дыхание</div>
-            <div class="anim-btn" data-anim="float">Парение</div>
-            <div class="anim-btn" data-anim="pulse">Пульс</div>
-            <div class="anim-btn" data-anim="glitch">Глитч</div>
-            <div class="anim-btn" data-anim="shake">Тряска</div>
-            <div class="anim-btn" data-anim="spin">Вращение</div>
-            <div class="anim-btn" data-anim="neon">Неон</div>
-            <!-- Новые -->
-            <div class="anim-btn"="100">
+        <div class="control-group">
+          <span class="control-label" id="lbl_anim">Анимация</span>
+          <div class="anim-grid" id="anim_grid">
+            <!-- Кнопки генерируются JS -->
+          </div>
+        </div>
 
-          <label style="font-size:10px; color:#aaa;">Размер (Масштаб): <span id="val_size">100%</span></label>
-          <input type="range" id="fx_size" min="30" max="150" value="100">
-
-          <label style="font-size:10px; color:#aaa;">Скорость: <span id="val_speed">1.0x</span></label>
-          <input type="range" id="fx_speed" min="0.2" max="3" step="0.1" value="1">
+        <div class="control-group">
+          <span class="control-label" id="lbl_style">Настройки</span>
+          <label style="font-size:10px; color:#888;">Size / Размер</label>
+          <input type="range" id="rng_size" min="50" max="150" value="100">
+          <label style="font-size:10px; color:#888;">Speed / Скорость</label>
+          <input type="range" id="rng_speed" min="0.5" max="3" step="0.1" value="1">
           
-          <div style="display:flex; align-items:center; gap:10px; margin-top:10px;">
-             <label style="font-size:10px; color:#aaa;">Свечение:</label>
-             <input type="color" id="fx_glow_color" value="#ff0055" style="border:none; width:20px; height:20px; padding:0; background:none; cursor:pointer;">
-             <input type="range" id="fx_glow_power" min="0" max="50" value="0" style="margin:0; flex:1;">
+          <div style="display:flex; gap:10px; margin-top:10px; align-items:center;">
+             <input type="color" id="clr_glow" value="#00e5ff" style="border:none; width:30px; height:30px; background:none;">
+             <input type="range" id="rng_glow" min="0" max="50" value="0">
           </div>
         </div>
       </div>
 
-      <!-- PREVIEW AREA -->
-      <div class="preview-area">
-        <div class="char-wrapper" id="fx_wrapper">
-          <div class="char-placeholder" id="fx_placeholder">Загрузите персонажа</div>
-          <img src="" id="fx_preview_img" class="char-img" style="display:none;">
+      <!-- ВКЛАДКА: КВЕСТ (ИГРОВЫЕ НАСТРОЙКИ) -->
+      <div class="tab-content" id="panel_quest">
+        <div style="font-size:11px; color:#888; margin-bottom:10px; line-height:1.4;">
+          <span id="txt_desc">Настройте вопрос. В итоговом коде персонаж будет реагировать на ответы.</span>
         </div>
 
-        <!-- BOTTOM BUTTON -->
-        <div class="bottom-bar">
-          <button class="btn-copy" id="fx_btn_copy">СКОПИРОВАТЬ КОД</button>
+        <div class="control-group">
+          <span class="control-label" id="lbl_q">Вопрос</span>
+          <input type="text" class="fx-input" id="inp_q" value="What is 2 + 2?">
         </div>
-        <!-- Hidden Textarea for Copying -->
-        <textarea id="fx_code" class="hidden-code"></textarea>
+
+        <div class="control-group">
+          <span class="control-label" style="color:var(--success)" id="lbl_a_cor">Верный Ответ</span>
+          <input type="text" class="fx-input" id="inp_a_cor" value="4">
+        </div>
+
+        <div class="control-group">
+          <span class="control-label" style="color:var(--accent)" id="lbl_a_wr">Неверный Ответ 1</span>
+          <input type="text" class="fx-input" id="inp_a_wr1" value="5">
+        </div>
+        
+        <div class="control-group">
+           <span class="control-label" style="color:var(--accent)" id="lbl_a_wr2">Неверный Ответ 2</span>
+           <input type="text" class="fx-input" id="inp_a_wr2" value="22">
+        </div>
+
+        <div class="control-group">
+          <span class="control-label" id="lbl_win_msg">Сообщение Победы</span>
+          <input type="text" class="fx-input" id="inp_win_msg" value="LEVEL UP!">
+        </div>
+      </div>
+
+    </div>
+
+    <!-- ЦЕНТРАЛЬНАЯ СЦЕНА -->
+    <div class="stage">
+      <div class="char-container" id="char_wrap">
+        <div class="char-placeholder" id="char_placeholder">NO IMAGE</div>
+        <img src="" id="char_img" class="char-img" style="display:none">
+      </div>
+
+      <!-- КНОПКА КОПИРОВАТЬ -->
+      <div class="code-dock">
+        <button class="btn-copy-main" onclick="app.copyCode()">
+          <span id="btn_copy_text">COPY CODE</span>
+        </button>
       </div>
     </div>
+    
+    <textarea id="hidden_code"></textarea>
+
   </div>
 
   <script>
-    (function() {
-      const root = document.getElementById('FX_ROOT');
-      
-      const ui = {
-        landing: root.querySelector('#fx_landing'),
-        editor: root.querySelector('#fx_editor'),
-        imgUrl: root.querySelector('#fx_img_url'),
-        fileInput: root.querySelector('#fx_file_input'),
-        successMark: root.querySelector('#fx_upload_success'),
-        
-        previewImg: root.querySelector('#fx_preview_img'),
-        placeholder: root.querySelector('#fx_placeholder'),
-        wrapper: root.querySelector('#fx_wrapper'),
-        
-        inputs: {
-          opacity: root.querySelector('#fx_opacity'),
-          size: root.querySelector('#fx_size'),
-          speed: root.querySelector('#fx_speed'),
-          glowColor: root.querySelector('#fx_glow_color'),
-          glowPower: root.querySelector('#fx_glow_power')
-        },
-        labels: {
-          opacity: root.querySelector('#val_opacity'),
-          size: root.querySelector('#val_size'),
-          speed: root.querySelector('#val_speed')
-        },
-        code: root.querySelector('#fx_code'),
-        btnCopy: root.querySelector('#fx_btn_copy'),
-        animBtns: root.querySelectorAll('.anim-btn')
-      };
-
-      let state = {
+    const app = {
+      lang: 'en',
+      state: {
+        src: '',
         anim: 'none',
-        currentSrc: '' 
-      };
-
-      // ПЕРЕКЛЮЧЕНИЕ
-      root.querySelector('#fx_btn_start').onclick = () => {
-        ui.landing.classList.add('hidden');
-        ui.editor.classList.add('visible');
-      };
-      root.querySelector('#fx_btn_back').onclick = () => {
-        ui.landing.classList.remove('hidden');
-        ui.editor.classList.remove('visible');
-      };
-
-      // ЗАГРУЗКА
-      ui.imgUrl.addEventListener('input', (e) => {
-        if(e.target.value.trim() !== '') {
-          loadImage(e.target.value);
-          ui.successMark.classList.remove('show');
+        size: 100,
+        speed: 1,
+        glowC: '#00e5ff',
+        glowP: 0
+      },
+      text: {
+        ru: {
+          hero: 'ГЕРОЙ', quest: 'КВЕСТ', upload: 'ЗАГРУЗИТЬ ФОТО', anim: 'АНИМАЦИЯ', style: 'СТИЛЬ',
+          q: 'ВОПРОС', ac: 'ВЕРНЫЙ ОТВЕТ', aw: 'НЕВЕРНЫЙ ОТВЕТ', win: 'СООБЩЕНИЕ ПОБЕДЫ',
+          copy: 'СКОПИРОВАТЬ КОД', desc: 'Создайте мини-игру. При верном ответе персонаж обрадуется.',
+          anims: { none:'Нет', idle:'Дыхание', float:'Парение', pulse:'Пульс', glitch:'Глитч', shake:'Тряска', spin:'Вращение', neon:'Неон', wobble:'Желе', swing:'Качели', bounce:'Прыжок', flip:'Сальто', ghost:'Призрак' }
+        },
+        en: {
+          hero: 'HERO', quest: 'QUEST', upload: 'UPLOAD IMAGE', anim: 'ANIMATION', style: 'STYLE',
+          q: 'QUESTION', ac: 'CORRECT ANSWER', aw: 'WRONG ANSWER', win: 'WIN MESSAGE',
+          copy: 'COPY CODE', desc: 'Create a mini-game. The character reacts to answers.',
+          anims: { none:'None', idle:'Idle', float:'Float', pulse:'Pulse', glitch:'Glitch', shake:'Shake', spin:'Spin', neon:'Neon', wobble:'Wobble', swing:'Swing', bounce:'Bounce', flip:'Flip', ghost:'Ghost' }
         }
-      });
-      ui.fileInput.addEventListener('change', (e) => {
-        const file = e.target.files[0];
-        if (file) {
-          const reader = new FileReader();
-          reader.onload = function(evt) {
-            loadImage(evt.target.result);
-            ui.successMark.classList.add('show');
-            ui.imgUrl.value = ''; 
+      },
+
+      init() {
+        this.renderAnimButtons();
+        this.bindEvents();
+      },
+
+      setLang(l) {
+        this.lang = l;
+        document.getElementById('view_landing').classList.add('hidden');
+        document.getElementById('view_editor').classList.add('visible');
+        this.updateLabels();
+        this.renderAnimButtons(); // перерисовка с новыми названиями
+      },
+
+      updateLabels() {
+        const t = this.text[this.lang];
+        const el = (id, txt) => document.getElementById(id).innerText = txt;
+        el('tab_hero', t.hero); el('tab_quest', t.quest);
+        el('btn_upload', t.upload); el('lbl_anim', t.anim); el('lbl_style', t.style);
+        el('lbl_q', t.q); el('lbl_a_cor', t.ac); el('lbl_a_wr', t.aw); el('lbl_a_wr2', t.aw + ' 2');
+        el('lbl_win_msg', t.win); el('btn_copy_text', t.copy); el('txt_desc', t.desc);
+      },
+
+      tab(name) {
+        document.querySelectorAll('.tab-link').forEach(b => b.classList.remove('active'));
+        document.querySelectorAll('.tab-content').forEach(p => p.classList.remove('show'));
+        document.getElementById('tab_' + name).classList.add('active');
+        document.getElementById('panel_' + name).classList.add('show');
+      },
+
+      renderAnimButtons() {
+        const grid = document.getElementById('anim_grid');
+        grid.innerHTML = '';
+        const list = ['none','idle','float','pulse','glitch','shake','spin','neon','wobble','swing','bounce','flip','ghost'];
+        list.forEach(a => {
+          const btn = document.createElement('div');
+          btn.className = 'fx-btn' + (this.state.anim === a ? ' active' : '');
+          btn.innerText = this.text[this.lang].anims[a];
+          btn.onclick = () => {
+            this.state.anim = a;
+            this.renderAnimButtons();
+            this.updatePreview();
           };
-          reader.readAsDataURL(file);
-        }
-      });
+          grid.appendChild(btn);
+        });
+      },
 
-      function loadImage(src) {
-        state.currentSrc = src;
-        ui.previewImg.src = src;
-        ui.previewImg.style.display = 'block';
-        ui.placeholder.style.display = 'none';
-        update();
-      }
-
-      // АНИМАЦИИ
-      ui.animBtns.forEach(btn => {
-        btn.onclick = () => {
-          ui.animBtns.forEach(b => b.classList.remove('active'));
-          btn.classList.add('active');
-          state.anim = btn.dataset.anim;
-          update();
-        }
-      });
-
-      // UPDATE
-      function update() {
-        if(!state.currentSrc) return;
-
-        const size = ui.inputs.size.value;
-        const opacity = ui.inputs.opacity.value;
-        const speed = ui.inputs.speed.value;
-        const glowColor = ui.inputs.glowColor.value;
-        const glowPower = ui.inputs.glowPower.value;
-
-        // UI Labels
-        ui.labels.size.innerText = size + '%';
-        ui.labels.speed.innerText = speed + 'x';
-        ui.labels.opacity.innerText = opacity + '%';
-
-        // Styles Preview
-        ui.wrapper.style.transform = `scale(${size/100})`;
-        ui.previewImg.style.opacity = opacity / 100;
-        ui.previewImg.style.setProperty('--op', opacity / 100); // Для ghost эффекта
-
-        // Classes
-        ui.previewImg.className = 'char-img';
-        if(state.anim !== 'none') ui.previewImg.classList.add('anim-' + state.anim);
-
-        // Speed
-        let baseDur = 2;
-        if(state.anim === 'shake' || state.anim === 'wobble') baseDur = 0.8;
-        if(state.anim === 'flip') baseDur = 3;
-        const duration = baseDur / speed;
-        ui.previewImg.style.setProperty('--dur', duration + 's');
-
-        // Glow
-        const filter = glowPower > 0 ? `drop-shadow(0 0 ${glowPower}px ${glowColor})` : 'none';
-        ui.previewImg.style.filter = filter;
-
-        generateCode(state.currentSrc, size, opacity, filter, duration, state.anim);
-      }
-
-      Object.values(ui.inputs).forEach(inp => inp.addEventListener('input', update));
-
-      // GENERATE CODE
-      function generateCode(src, size, opacity, filter, dur, animType) {
-        let animCss = '';
+      bindEvents() {
+        // Image
+        document.getElementById('inp_file').onchange = (e) => {
+          const r = new FileReader();
+          r.onload = (ev) => this.setImage(ev.target.result);
+          if(e.target.files[0]) r.readAsDataURL(e.target.files[0]);
+        };
+        document.getElementById('inp_url').oninput = (e) => this.setImage(e.target.value);
         
-        if (animType !== 'none') {
-           // Определяем тип сглаживания анимации
-           let timing = 'ease-in-out';
-           if(animType === 'glitch') timing = 'steps(2)';
-           if(animType === 'shake' || animType === 'spin' || animType === 'flip') timing = 'linear';
-           if(animType === 'bounce') timing = 'ease';
-           
-           // Для свинга точку вращения меняем
-           let transformOrigin = (animType === 'swing') ? 'top center' : 'center center';
-           
-           animCss = `animation: fx-${animType} ${dur}s infinite ${timing}; transform-origin: ${transformOrigin};`;
-        }
+        // Ranges
+        ['size','speed','glow'].forEach(k => {
+          document.getElementById('rng_' + k).oninput = (e) => {
+            if(k === 'glow') this.state.glowP = e.target.value;
+            else this.state[k] = e.target.value;
+            this.updatePreview();
+          }
+        });
+        document.getElementById('clr_glow').oninput = (e) => {
+           this.state.glowC = e.target.value;
+           this.updatePreview();
+        };
+      },
 
-        // Ключевые кадры (вставляем в код iframe)
-        const keyframes = `
-    @keyframes fx-idle { 0%,100% {transform:translateY(0)} 50% {transform:translateY(-6px)} }
-    @keyframes fx-float { 0%,100% {transform:translateY(0) rotate(0deg)} 50% {transform:translateY(-15px) rotate(2deg)} }
-    @keyframes fx-pulse { 0%,100% {transform:scale(1)} 50% {transform:scale(1.05)} }
-    @keyframes fx-shake { 0% {transform: translate(1px, 1px)} 20% {transform: translate(-3px, 0px)} 40% {transform: translate(1px, -1px)} 60% {transform: translate(-3px, 1px)} 80% {transform: translate(-1px, -1px)} 100% {transform: translate(1px, -2px)} }
-    @keyframes fx-glitch { 0% {transform: translate(0)} 20% {transform: translate(-2px, 2px)} 40% {transform: translate(-2px, -2px)} 60% {transform: translate(2px, 2px)} 80% {transform: translate(2px, -2px)} 100% {transform: translate(0)} }
-    @keyframes fx-spin { 0% {transform: rotate(0deg)} 100% {transform: rotate(360deg)} }
-    @keyframes fx-neon { 0%,100% {opacity: 1; filter: brightness(1) ${filter};} 50% {opacity: 0.8; filter: brightness(1.5) ${filter};} }
-    @keyframes fx-wobble { 0%,100%{transform:translateX(0%) rotate(0deg)} 15%{transform:translateX(-5px) rotate(-3deg)} 30%{transform:translateX(3px) rotate(3deg)} 45%{transform:translateX(-3px) rotate(-2deg)} 60%{transform:translateX(2px) rotate(1deg)} 75%{transform:translateX(-1px) rotate(-1deg)} }
-    @keyframes fx-swing { 20% {transform: rotate(5deg);} 40% {transform: rotate(-3deg);} 60% {transform: rotate(2deg);} 80% {transform: rotate(-1deg);} 0%, 100% {transform: rotate(0deg);} }
-    @keyframes fx-bounce { 0%, 20%, 50%, 80%, 100% {transform: translateY(0);} 40% {transform: translateY(-20px);} 60% {transform: translateY(-10px);} }
-    @keyframes fx-flip { 0% {transform: perspective(400px) rotateY(0);} 100% {transform: perspective(400px) rotateY(360deg);} }
-    @keyframes fx-ghost { 0%,100% { opacity: ${opacity/100}; transform: scale(1); } 50% { opacity: ${opacity/200}; transform: scale(1.05); } }
+      setImage(src) {
+        if(!src) return;
+        this.state.src = src;
+        const img = document.getElementById('char_img');
+        img.src = src;
+        img.style.display = 'block';
+        document.getElementById('char_placeholder').style.display = 'none';
+        this.updatePreview();
+      },
+
+      updatePreview() {
+        const img = document.getElementById('char_img');
+        const s = this.state;
+        
+        // Size
+        document.getElementById('char_wrap').style.transform = `scale(${s.size/100})`;
+        
+        // Filter
+        const glow = s.glowP > 0 ? `drop-shadow(0 0 ${s.glowP}px ${s.glowC})` : 'none';
+        img.style.filter = glow;
+
+        // Anim
+        img.className = 'char-img'; // reset
+        if(s.anim !== 'none') {
+           img.classList.add('anim-' + s.anim);
+           // Duration calc
+           let base = 2;
+           if(['shake','wobble'].includes(s.anim)) base = 0.8;
+           if(['flip'].includes(s.anim)) base = 3;
+           img.style.setProperty('--dur', (base / s.speed) + 's');
+        }
+      },
+
+      copyCode() {
+        if(!this.state.src) { alert('Upload image first!'); return; }
+        
+        const qData = {
+          q: document.getElementById('inp_q').value,
+          c: document.getElementById('inp_a_cor').value,
+          w1: document.getElementById('inp_a_wr1').value,
+          w2: document.getElementById('inp_a_wr2').value,
+          msg: document.getElementById('inp_win_msg').value
+        };
+
+        const code = this.generateHtml(qData);
+        const area = document.getElementById('hidden_code');
+        area.value = `<iframe srcdoc="${code.replace(/"/g, '&quot;')}" width="100%" height="100%" frameborder="0" style="background:transparent;"></iframe>`;
+        area.select();
+        document.execCommand('copy');
+        
+        const btn = document.getElementById('btn_copy_text');
+        const old = btn.innerText;
+        btn.innerText = 'COPIED!';
+        setTimeout(() => btn.innerText = old, 1500);
+      },
+
+      generateHtml(q) {
+        const s = this.state;
+        
+        // CSS Generation for inside iframe
+        let animRule = '';
+        if(s.anim !== 'none') {
+           let dur = (['shake','wobble'].includes(s.anim) ? 0.8 : 2) / s.speed;
+           let timing = s.anim === 'glitch' ? 'steps(2)' : 'ease-in-out';
+           animRule = `animation: fx-${s.anim} ${dur}s infinite ${timing};`;
+        }
+        
+        const glow = s.glowP > 0 ? `drop-shadow(0 0 ${s.glowP}px ${s.glowC})` : 'none';
+
+        // THE GAME LOGIC SCRIPT
+        const script = `
+          <script>
+            function check(el, isCorrect) {
+              const char = document.getElementById('hero');
+              const box = document.getElementById('msg-box');
+              const bar = document.getElementById('xp-bar-fill');
+              
+              if(isCorrect) {
+                // WIN
+                char.style.animation = 'fx-bounce 0.6s ease infinite';
+                el.style.background = '#00ff88';
+                el.style.color = '#000';
+                box.innerText = '${q.msg}';
+                box.style.opacity = 1;
+                bar.style.width = '100%';
+              } else {
+                // LOSE
+                char.style.animation = 'fx-shake 0.4s linear infinite';
+                el.style.background = '#ff0055';
+                setTimeout(() => {
+                   char.style.animation = '${animRule.split(';')[0].replace('animation:','')}';
+                   el.style.background = '';
+                }, 1000);
+              }
+            }
+          <\/script>
         `;
 
-        // HTML БЛОК
-        // Добавлено body { margin:0; overflow:hidden } чтобы убрать скроллы в Genially
-        const htmlBlock = `
+        return `
 <!DOCTYPE html>
 <html>
 <head>
+<link href="https://fonts.googleapis.com/css2?family=Montserrat:wght@700;900&display=swap" rel="stylesheet">
 <style>
-  body { margin: 0; padding: 0; overflow: hidden; width: 100vw; height: 100vh; display: flex; justify-content: center; align-items: center; background: transparent; }
-  ${keyframes}
+  body { margin:0; overflow:hidden; font-family:'Montserrat',sans-serif; display:flex; flex-direction:column; align-items:center; justify-content:center; height:100vh; background:transparent; }
+  
+  /* KEYFRAMES */
+  @keyframes fx-idle { 0%,100% {transform:translateY(0)} 50% {transform:translateY(-6px)} }
+  @keyframes fx-float { 0%,100% {transform:translateY(0) rotate(0deg)} 50% {transform:translateY(-15px) rotate(2deg)} }
+  @keyframes fx-pulse { 0%,100% {transform:scale(1)} 50% {transform:scale(1.05)} }
+  @keyframes fx-shake { 0% {transform: translate(1px, 1px)} 20% {transform: translate(-3px, 0px)} 40% {transform: translate(1px, -1px)} 60% {transform: translate(-3px, 1px)} 80% {transform: translate(-1px, -1px)} 100% {transform: translate(1px, -2px)} }
+  @keyframes fx-glitch { 0% {transform: translate(0)} 20% {transform: translate(-2px, 2px)} 40% {transform: translate(-2px, -2px)} 60% {transform: translate(2px, 2px)} 80% {transform: translate(2px, -2px)} 100% {transform: translate(0)} }
+  @keyframes fx-spin { 0% {transform: rotateY(0deg)} 100% {transform: rotateY(360deg)} }
+  @keyframes fx-neon { 0%,100% {opacity: 1; filter: brightness(1) ${glow};} 50% {opacity: 0.8; filter: brightness(1.5) ${glow};} }
+  @keyframes fx-wobble { 0%,100%{transform:rotate(0deg)} 25%{transform:rotate(-5deg)} 75%{transform:rotate(5deg)} }
+  @keyframes fx-swing { 0%{transform:rotate(0deg)} 20%{transform:rotate(15deg)} 40%{transform:rotate(-10deg)} 60%{transform:rotate(5deg)} 80%{transform:rotate(-5deg)} 100%{transform:rotate(0deg)} }
+  @keyframes fx-bounce { 0%, 20%, 50%, 80%, 100% {transform: translateY(0);} 40% {transform: translateY(-30px);} 60% {transform: translateY(-15px);} }
+  @keyframes fx-flip { 0% {transform: rotateY(0);} 100% {transform: rotateY(360deg);} }
+  @keyframes fx-ghost { 0%,100% { opacity: 1; transform: scale(1); } 50% { opacity: 0.4; transform: scale(1.05); } }
+
+  .game-container { display:flex; align-items:center; gap:40px; }
+  .char-area { width: 300px; height: 400px; display:flex; align-items:center; justify-content:center; position:relative; }
+  .char-img { max-width:100%; max-height:100%; ${animRule} filter:${glow}; transition:0.3s; }
+  
+  .ui-area { width: 300px; display:flex; flex-direction:column; gap:10px; }
+  .question { color:#fff; font-size:24px; text-transform:uppercase; margin-bottom:15px; text-shadow:0 0 10px rgba(0,0,0,0.5); font-weight:900; }
+  
+  .btn {
+    background:rgba(255,255,255,0.1); border:2px solid rgba(255,255,255,0.2); color:#fff;
+    padding:12px; font-weight:700; cursor:pointer; text-transform:uppercase; font-family:inherit;
+    transition:0.2s; border-radius:8px;
+  }
+  .btn:hover { background:rgba(255,255,255,0.3); transform:translateX(5px); }
+  
+  .xp-bar { width:100%; height:10px; background:rgba(0,0,0,0.5); border-radius:5px; margin-top:20px; overflow:hidden; border:1px solid rgba(255,255,255,0.1); }
+  .xp-fill { width:0%; height:100%; background:#00ff88; transition:1s cubic-bezier(0.175, 0.885, 0.32, 1.275); box-shadow:0 0 10px #00ff88; }
+  
+  .msg-box { position:absolute; top:-40px; width:100%; text-align:center; color:#00ff88; font-weight:900; opacity:0; transition:0.3s; font-size:20px; text-shadow:0 0 10px black; }
+
 </style>
 </head>
 <body>
-  <div style="transform:scale(${size/100}); opacity:${opacity/100}; width: 100%; height: 100%; display:flex; justify-content:center; align-items:center;">
-    <img src="${src}" style="max-width:100%; max-height:100%; object-fit:contain; display:block; ${animCss} filter:${filter};">
+  <div class="game-container" style="transform:scale(${s.size/100})">
+    <div class="char-area">
+      <div class="msg-box" id="msg-box"></div>
+      <img src="${s.src}" class="char-img" id="hero">
+    </div>
+    <div class="ui-area">
+      <div class="question">${q.q}</div>
+      <button class="btn" onclick="check(this, true)">${q.c}</button>
+      <button class="btn" onclick="check(this, false)">${q.w1}</button>
+      ${q.w2 ? `<button class="btn" onclick="check(this, false)">${q.w2}</button>` : ''}
+      
+      <div style="font-size:10px; color:#aaa; margin-top:10px;">LEVEL PROGRESS</div>
+      <div class="xp-bar"><div class="xp-fill" id="xp-bar-fill"></div></div>
+    </div>
   </div>
+  ${script}
 </body>
 </html>`;
-
-        // Формируем iframe
-        ui.code.value = `<iframe srcdoc="${htmlBlock.replace(/"/g, '&quot;')}" width="100%" height="100%" frameborder="0" style="background:transparent; overflow:hidden;"></iframe>`;
       }
+    };
 
-      // COPY BUTTON
-      ui.btnCopy.onclick = function() {
-        ui.code.select();
-        document.execCommand('copy');
-        const oldText = this.innerText;
-        this.innerText = 'ГОТОВО!';
-        this.style.background = '#00ff88';
-        this.style.color = '#000';
-        setTimeout(() => {
-          this.innerText = oldText;
-          this.style.background = '';
-          this.style.color = '';
-        }, 1500);
-      };
-
-    })();
+    // Старт
+    app.init();
   </script>
 </div>

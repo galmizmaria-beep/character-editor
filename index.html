@@ -1,26 +1,27 @@
 <div id="FX_ROOT">
 
 <style>
-    @import url('https://fonts.googleapis.com/css2?family=Rajdhani:wght@500;700;800&display=swap');
+    /* Подключаем шрифт, поддерживающий кириллицу */
+    @import url('https://fonts.googleapis.com/css2?family=Rajdhani:wght@600;700;800&family=Montserrat:wght@800;900&display=swap');
 
-    /* --- CSS ПЕРЕМЕННЫЕ И БАЗА --- */
+    /* --- CSS ПЕРЕМЕННЫЕ --- */
     #FX_ROOT {
-        --bg-dark: #0f0c16;
-        --bg-glass: rgba(30, 27, 46, 0.6);
-        --bg-glass-hover: rgba(40, 35, 60, 0.8);
-        --primary: #ff0055; /* Неоновый красный/розовый */
-        --secondary: #00e5ff; /* Неоновый голубой */
+        --bg-dark: #090610;
+        --bg-glass: rgba(30, 27, 46, 0.85);
+        --primary: #ff0055; /* Розовый неон (для кнопки) */
+        --secondary: #00e5ff; /* Голубой неон (для текста) */
         --text-main: #ffffff;
         --text-muted: #8b86a3;
-        --border: rgba(255, 255, 255, 0.1);
+        --border: rgba(255, 255, 255, 0.15);
         
         width: 100%;
         height: 100%;
-        font-family: 'Rajdhani', sans-serif;
+        /* Шрифт Montserrat лучше подходит для жирных русских заголовков */
+        font-family: 'Montserrat', sans-serif; 
         background-color: var(--bg-dark);
         background-image: 
-            radial-gradient(circle at 10% 20%, rgba(88, 28, 135, 0.4) 0%, transparent 40%),
-            radial-gradient(circle at 90% 80%, rgba(255, 0, 85, 0.15) 0%, transparent 40%);
+            radial-gradient(circle at 0% 0%, rgba(0, 229, 255, 0.15) 0%, transparent 50%),
+            radial-gradient(circle at 100% 100%, rgba(255, 0, 85, 0.1) 0%, transparent 50%);
         color: var(--text-main);
         overflow: hidden;
         position: relative;
@@ -31,21 +32,21 @@
     #FX_ROOT * { box-sizing: border-box; outline: none; -webkit-tap-highlight-color: transparent; }
     
     /* Скроллбар */
-    #FX_ROOT ::-webkit-scrollbar { width: 6px; }
+    #FX_ROOT ::-webkit-scrollbar { width: 4px; }
     #FX_ROOT ::-webkit-scrollbar-track { background: rgba(0,0,0,0.2); }
-    #FX_ROOT ::-webkit-scrollbar-thumb { background: var(--primary); border-radius: 3px; }
+    #FX_ROOT ::-webkit-scrollbar-thumb { background: var(--primary); border-radius: 2px; }
 
     /* --- ЭКРАН ПРИВЕТСТВИЯ (LANDING) --- */
     #FX_ROOT .landing-view {
         position: absolute;
         top: 0; left: 0; width: 100%; height: 100%;
         display: flex;
-        flex-direction: column;
         align-items: center;
         justify-content: center;
         z-index: 20;
         transition: transform 0.6s cubic-bezier(0.68, -0.55, 0.27, 1.55), opacity 0.4s;
-        background: var(--bg-dark); /* Перекрывает редактор */
+        background: var(--bg-dark);
+        padding: 20px;
     }
     
     #FX_ROOT .landing-view.hidden {
@@ -54,71 +55,108 @@
         opacity: 0;
     }
 
-    /* Аватар сверху */
-    #FX_ROOT .hero-avatar-wrap {
-        position: relative;
-        width: 160px;
-        height: 160px;
-        margin-bottom: 20px;
-        border-radius: 50%;
-        padding: 4px;
-        background: linear-gradient(45deg, var(--primary), var(--secondary));
-        box-shadow: 0 0 30px rgba(255, 0, 85, 0.4);
-    }
-    
-    #FX_ROOT .hero-avatar-img {
-        width: 100%; height: 100%;
-        border-radius: 50%;
-        object-fit: cover;
-        background: #000;
-        border: 3px solid #000;
+    /* Сетка лендинга: Текст - Кнопка - Персонаж */
+    #FX_ROOT .landing-grid {
+        display: grid;
+        grid-template-columns: 1fr auto 1fr;
+        align-items: center;
+        width: 100%;
+        max-width: 1100px;
+        gap: 20px;
     }
 
-    /* Название */
-    #FX_ROOT .brand-title {
-        font-size: 42px;
+    /* ЛЕВАЯ ЧАСТЬ: ЗАГОЛОВОК */
+    #FX_ROOT .title-area {
+        text-align: left;
+        padding-left: 20px;
+    }
+
+    #FX_ROOT .main-title-ru {
+        font-family: 'Montserrat', sans-serif;
+        font-size: 58px; /* Крупный размер */
+        line-height: 0.95;
+        font-weight: 900;
+        text-transform: uppercase;
+        color: #fff;
+        /* Неоновое свечение текста (голубое) */
+        text-shadow: 
+            0 0 10px rgba(0, 229, 255, 0.5),
+            0 0 30px rgba(0, 229, 255, 0.3),
+            0 0 60px rgba(0, 229, 255, 0.2);
+        animation: titlePulse 3s infinite alternate;
+        position: relative;
+        z-index: 2;
+    }
+
+    @keyframes titlePulse {
+        0% { text-shadow: 0 0 10px rgba(0, 229, 255, 0.4), 0 0 20px rgba(0, 229, 255, 0.2); transform: scale(1); }
+        100% { text-shadow: 0 0 20px rgba(0, 229, 255, 0.8), 0 0 50px rgba(0, 229, 255, 0.5); transform: scale(1.02); }
+    }
+
+    /* ЦЕНТР: КНОПКА */
+    #FX_ROOT .btn-area {
+        display: flex;
+        justify-content: center;
+        align-items: center;
+        z-index: 5;
+    }
+
+    #FX_ROOT .btn-start {
+        padding: 20px 40px;
+        font-size: 18px;
         font-weight: 800;
         text-transform: uppercase;
-        letter-spacing: 4px;
-        margin-bottom: 40px;
-        text-align: center;
-        background: linear-gradient(90deg, #fff, var(--secondary));
-        -webkit-background-clip: text;
-        -webkit-text-fill-color: transparent;
-        text-shadow: 0 0 20px rgba(0, 229, 255, 0.3);
-    }
-
-    /* Пульсирующая кнопка */
-    #FX_ROOT .btn-start {
-        padding: 18px 50px;
-        font-size: 20px;
-        font-weight: 700;
-        text-transform: uppercase;
-        letter-spacing: 2px;
+        letter-spacing: 1px;
         color: #fff;
-        background: transparent;
+        background: rgba(0,0,0,0.3);
         border: 2px solid var(--primary);
         border-radius: 50px;
         cursor: pointer;
         position: relative;
-        overflow: hidden;
+        white-space: nowrap;
+        box-shadow: 
+            0 0 15px var(--primary), 
+            inset 0 0 15px var(--primary);
+        animation: btnNeonPulse 1.5s infinite;
+        font-family: 'Montserrat', sans-serif;
         transition: 0.3s;
-        box-shadow: 0 0 15px var(--primary), inset 0 0 10px var(--primary);
-        animation: neonPulse 2s infinite;
-        font-family: 'Rajdhani', sans-serif;
     }
 
-    @keyframes neonPulse {
+    @keyframes btnNeonPulse {
         0% { box-shadow: 0 0 10px var(--primary), inset 0 0 5px var(--primary); transform: scale(1); }
-        50% { box-shadow: 0 0 30px var(--primary), inset 0 0 15px var(--primary); transform: scale(1.05); }
+        50% { box-shadow: 0 0 35px var(--primary), inset 0 0 15px var(--primary); transform: scale(1.05); }
         100% { box-shadow: 0 0 10px var(--primary), inset 0 0 5px var(--primary); transform: scale(1); }
     }
 
     #FX_ROOT .btn-start:hover {
         background: var(--primary);
-        box-shadow: 0 0 50px var(--primary);
+        box-shadow: 0 0 60px var(--primary);
         text-shadow: 0 0 5px #fff;
     }
+
+    /* ПРАВАЯ ЧАСТЬ: ПЕРСОНАЖ */
+    #FX_ROOT .char-area {
+        display: flex;
+        justify-content: center;
+        align-items: center;
+        position: relative;
+    }
+
+    #FX_ROOT .landing-char-img {
+        max-width: 100%;
+        height: auto;
+        max-height: 450px; /* Ограничение высоты */
+        object-fit: contain;
+        filter: drop-shadow(0 0 20px rgba(139, 0, 255, 0.3));
+        /* Легкое парение */
+        animation: charFloat 4s ease-in-out infinite;
+    }
+
+    @keyframes charFloat {
+        0%, 100% { transform: translateY(0); }
+        50% { transform: translateY(-15px); }
+    }
+
 
     /* --- РЕДАКТОР (EDITOR) --- */
     #FX_ROOT .editor-view {
@@ -136,17 +174,17 @@
         display: flex;
         justify-content: space-between;
         align-items: center;
-        padding: 0 10px 15px;
+        padding: 0 10px 10px;
         border-bottom: 1px solid var(--border);
         margin-bottom: 10px;
     }
-    #FX_ROOT .editor-title { font-size: 20px; font-weight: 800; text-transform: uppercase; letter-spacing: 2px; }
+    #FX_ROOT .editor-title { font-size: 18px; font-weight: 800; text-transform: uppercase; letter-spacing: 1px; }
     #FX_ROOT .editor-title span { color: var(--primary); }
     
     #FX_ROOT .btn-back {
         background: none; border: none; color: var(--text-muted);
-        cursor: pointer; font-size: 14px; text-transform: uppercase;
-        font-family: inherit; transition: 0.3s;
+        cursor: pointer; font-size: 12px; text-transform: uppercase;
+        font-family: inherit; font-weight: 700; transition: 0.3s;
     }
     #FX_ROOT .btn-back:hover { color: #fff; }
 
@@ -154,18 +192,18 @@
     #FX_ROOT .editor-grid {
         flex: 1;
         display: grid;
-        grid-template-columns: 320px 1fr;
+        grid-template-columns: 300px 1fr;
         gap: 15px;
-        min-height: 0; /* Важно для скролла */
+        min-height: 0;
     }
 
     /* Панели */
     #FX_ROOT .panel {
         background: var(--bg-glass);
-        backdrop-filter: blur(10px);
-        -webkit-backdrop-filter: blur(10px);
+        backdrop-filter: blur(12px);
+        -webkit-backdrop-filter: blur(12px);
         border: 1px solid var(--border);
-        border-radius: 16px;
+        border-radius: 12px;
         display: flex;
         flex-direction: column;
         overflow: hidden;
@@ -174,64 +212,67 @@
     #FX_ROOT .controls-panel {
         padding: 15px;
         overflow-y: auto;
-        gap: 15px;
+        gap: 12px;
     }
 
     /* Элементы управления */
-    #FX_ROOT .control-group { display: flex; flex-direction: column; gap: 8px; }
-    #FX_ROOT label { font-size: 12px; text-transform: uppercase; color: var(--text-muted); letter-spacing: 1px; font-weight: 700; }
+    #FX_ROOT .control-group { display: flex; flex-direction: column; gap: 6px; }
+    #FX_ROOT label { font-size: 11px; text-transform: uppercase; color: var(--text-muted); letter-spacing: 1px; font-weight: 700; }
     
-    #FX_ROOT input[type="text"], 
-    #FX_ROOT input[type="url"] {
-        background: rgba(0,0,0,0.3);
+    /* КОМПАКТНЫЙ ИНПУТ (БЕЗ ЛУПЫ) */
+    #FX_ROOT input[type="text"] {
+        background: rgba(0,0,0,0.4);
         border: 1px solid var(--border);
         color: #fff;
-        padding: 10px;
-        border-radius: 8px;
-        font-family: inherit;
-        font-size: 14px;
+        padding: 8px 10px; /* Компактные отступы */
+        border-radius: 6px;
+        font-family: 'Montserrat', sans-serif;
+        font-size: 12px;
+        width: 100%;
+        transition: border 0.3s;
     }
-    #FX_ROOT input:focus { border-color: var(--secondary); }
+    #FX_ROOT input[type="text"]:focus { border-color: var(--secondary); }
 
+    /* Ползунки */
     #FX_ROOT input[type="range"] {
         -webkit-appearance: none; width: 100%; height: 4px;
-        background: rgba(255,255,255,0.1); border-radius: 2px; margin: 10px 0;
+        background: rgba(255,255,255,0.1); border-radius: 2px; margin: 8px 0;
     }
     #FX_ROOT input[type="range"]::-webkit-slider-thumb {
-        -webkit-appearance: none; width: 16px; height: 16px;
+        -webkit-appearance: none; width: 14px; height: 14px;
         background: var(--primary); border-radius: 50%; cursor: pointer;
-        box-shadow: 0 0 10px var(--primary);
+        box-shadow: 0 0 8px var(--primary);
     }
 
     /* Табы анимации */
-    #FX_ROOT .anim-tabs { display: flex; background: rgba(0,0,0,0.3); padding: 4px; border-radius: 8px; margin-bottom: 5px; }
+    #FX_ROOT .anim-tabs { display: flex; background: rgba(0,0,0,0.3); padding: 3px; border-radius: 6px; margin-bottom: 5px; }
     #FX_ROOT .tab-btn {
         flex: 1; border: none; background: none; color: var(--text-muted);
-        padding: 6px; font-size: 12px; cursor: pointer; border-radius: 6px;
+        padding: 6px; font-size: 11px; cursor: pointer; border-radius: 4px;
         text-transform: uppercase; font-family: inherit; font-weight: 700; transition: 0.2s;
     }
-    #FX_ROOT .tab-btn.active { background: rgba(255,255,255,0.1); color: #fff; }
+    #FX_ROOT .tab-btn.active { background: rgba(255,255,255,0.15); color: #fff; }
 
-    #FX_ROOT .anim-grid { display: none; grid-template-columns: 1fr 1fr; gap: 8px; }
+    #FX_ROOT .anim-grid { display: none; grid-template-columns: 1fr 1fr; gap: 6px; }
     #FX_ROOT .anim-grid.show { display: grid; }
 
     #FX_ROOT .anim-item {
         background: rgba(255,255,255,0.03); border: 1px solid transparent;
-        color: #ccc; padding: 8px; font-size: 12px; text-align: center;
+        color: #ccc; padding: 8px; font-size: 11px; text-align: center;
         border-radius: 6px; cursor: pointer; transition: 0.2s;
     }
     #FX_ROOT .anim-item:hover { background: rgba(255,255,255,0.08); }
     #FX_ROOT .anim-item.selected {
         border-color: var(--secondary); color: var(--secondary);
-        background: rgba(0, 229, 255, 0.1); box-shadow: 0 0 10px rgba(0, 229, 255, 0.1);
+        background: rgba(0, 229, 255, 0.1);
     }
 
     /* Палитра и Свечение */
     #FX_ROOT .glow-controls { display: flex; align-items: center; gap: 10px; }
     #FX_ROOT input[type="color"] {
-        -webkit-appearance: none; border: none; width: 30px; height: 30px;
+        -webkit-appearance: none; border: none; width: 25px; height: 25px;
         border-radius: 50%; overflow: hidden; padding: 0; cursor: pointer;
-        box-shadow: 0 0 0 2px var(--border);
+        box-shadow: 0 0 0 1px var(--border);
     }
     #FX_ROOT input[type="color"]::-webkit-color-swatch-wrapper { padding: 0; }
     #FX_ROOT input[type="color"]::-webkit-color-swatch { border: none; }
@@ -253,29 +294,31 @@
     
     /* Code Output */
     #FX_ROOT .code-panel {
-        height: 80px;
+        height: 60px;
         border-top: 1px solid var(--border);
         background: #000;
         display: flex;
     }
     #FX_ROOT textarea {
         flex: 1; background: transparent; border: none; color: var(--secondary);
-        font-family: monospace; font-size: 10px; resize: none; padding: 10px;
+        font-family: monospace; font-size: 10px; resize: none; padding: 8px;
     }
     #FX_ROOT .btn-copy {
         background: var(--secondary); color: #000; border: none;
-        width: 80px; font-weight: 700; cursor: pointer; text-transform: uppercase;
-        font-size: 11px; transition: 0.2s;
+        width: 70px; font-weight: 700; cursor: pointer; text-transform: uppercase;
+        font-size: 10px; transition: 0.2s;
     }
     #FX_ROOT .btn-copy:hover { background: #fff; }
 
     /* АДАПТИВНОСТЬ */
-    @media (max-width: 768px) {
+    @media (max-width: 900px) {
+        #FX_ROOT .landing-grid { grid-template-columns: 1fr; text-align: center; }
+        #FX_ROOT .title-area { padding: 0; text-align: center; }
         #FX_ROOT .editor-grid { grid-template-columns: 1fr; grid-template-rows: auto 1fr; }
         #FX_ROOT .preview-panel { min-height: 250px; order: -1; }
     }
 
-    /* --- АНИМАЦИИ (KEYFRAMES) --- */
+    /* АНИМАЦИИ ДЛЯ ПРЕВЬЮ */
     @keyframes fx-idle { 0%,100% {transform:translateY(0)} 50% {transform:translateY(-6px)} }
     @keyframes fx-float { 0%,100% {transform:translateY(0) rotate(0deg)} 50% {transform:translateY(-15px) rotate(2deg)} }
     @keyframes fx-pulse { 0%,100% {transform:scale(1)} 50% {transform:scale(1.05)} }
@@ -296,22 +339,34 @@
 
 <!-- LANDING PAGE -->
 <div class="landing-view" id="fx_landing">
-    <!-- АВАТАР ИЗ РЕФЕРЕНСА -->
-    <div class="hero-avatar-wrap">
-        <!-- Ссылка на изображение из вашего референса (или похожее) -->
-        <img src="https://i.pinimg.com/736x/8b/16/7a/8b167af653c239996c9926978170d65b.jpg" class="hero-avatar-img" alt="Hero Avatar">
+    <div class="landing-grid">
+        
+        <!-- СЛЕВА: НАЗВАНИЕ -->
+        <div class="title-area">
+            <div class="main-title-ru">
+                РЕДАКТОР<br>ПЕРСОНАЖА
+            </div>
+        </div>
+
+        <!-- ЦЕНТР: КНОПКА -->
+        <div class="btn-area">
+            <button class="btn-start" id="fx_btn_start">СОЗДАТЬ ГЕРОЯ</button>
+        </div>
+
+        <!-- СПРАВА: ПЕРСОНАЖ -->
+        <div class="char-area">
+            <!-- Использую ссылку на похожего персонажа (3D мальчик с красными волосами) -->
+            <img src="https://i.pinimg.com/originals/18/69/0d/18690d5690558b29381c62657e28b212.png" class="landing-char-img" alt="Hero Character">
+        </div>
+
     </div>
-    
-    <div class="brand-title">Neon Morphic</div>
-    
-    <button class="btn-start" id="fx_btn_start">Создать Героя</button>
 </div>
 
 <!-- EDITOR PAGE -->
 <div class="editor-view" id="fx_editor">
     <div class="editor-header">
-        <div class="editor-title">Repo: <span>character-editor</span></div>
-        <button class="btn-back" id="fx_btn_back">← Назад</button>
+        <div class="editor-title">Redactor <span>Pro</span></div>
+        <button class="btn-back" id="fx_btn_back">← На главную</button>
     </div>
 
     <div class="editor-grid">
@@ -319,9 +374,9 @@
         <div class="panel controls-panel">
             
             <div class="control-group">
-                <label>Ссылка на персонажа</label>
-                <!-- Дефолтное изображение с прозрачным фоном для теста -->
-                <input type="text" id="fx_img_url" value="https://cdn-icons-png.flaticon.com/512/9308/9308697.png">
+                <label>Ссылка на картинку</label>
+                <!-- Компактное поле без лупы -->
+                <input type="text" id="fx_img_url" value="https://i.pinimg.com/originals/18/69/0d/18690d5690558b29381c62657e28b212.png" placeholder="Вставьте URL...">
             </div>
 
             <div class="control-group">
@@ -471,9 +526,9 @@
         generateCode(url, size, speed, glowColor, glowPower, filter, duration);
     }
 
-    // 5. Генерация кода для GitHub Pages
+    // 5. Генерация кода
     function generateCode(url, size, speed, color, power, filter, dur) {
-        // Упрощенный CSS для вставки
+        // CSS keyframes
         const keyframes = `
 @keyframes fx-idle { 0%,100% {transform:translateY(0)} 50% {transform:translateY(-6px)} }
 @keyframes fx-float { 0%,100% {transform:translateY(0) rotate(0deg)} 50% {transform:translateY(-15px) rotate(2deg)} }

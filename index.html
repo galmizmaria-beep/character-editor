@@ -1,0 +1,518 @@
+<div id="FX_ROOT">
+
+<style>
+    @import url('https://fonts.googleapis.com/css2?family=Rajdhani:wght@500;700;800&display=swap');
+
+    /* --- CSS ПЕРЕМЕННЫЕ И БАЗА --- */
+    #FX_ROOT {
+        --bg-dark: #0f0c16;
+        --bg-glass: rgba(30, 27, 46, 0.6);
+        --bg-glass-hover: rgba(40, 35, 60, 0.8);
+        --primary: #ff0055; /* Неоновый красный/розовый */
+        --secondary: #00e5ff; /* Неоновый голубой */
+        --text-main: #ffffff;
+        --text-muted: #8b86a3;
+        --border: rgba(255, 255, 255, 0.1);
+        
+        width: 100%;
+        height: 100%;
+        font-family: 'Rajdhani', sans-serif;
+        background-color: var(--bg-dark);
+        background-image: 
+            radial-gradient(circle at 10% 20%, rgba(88, 28, 135, 0.4) 0%, transparent 40%),
+            radial-gradient(circle at 90% 80%, rgba(255, 0, 85, 0.15) 0%, transparent 40%);
+        color: var(--text-main);
+        overflow: hidden;
+        position: relative;
+        display: flex;
+        flex-direction: column;
+    }
+
+    #FX_ROOT * { box-sizing: border-box; outline: none; -webkit-tap-highlight-color: transparent; }
+    
+    /* Скроллбар */
+    #FX_ROOT ::-webkit-scrollbar { width: 6px; }
+    #FX_ROOT ::-webkit-scrollbar-track { background: rgba(0,0,0,0.2); }
+    #FX_ROOT ::-webkit-scrollbar-thumb { background: var(--primary); border-radius: 3px; }
+
+    /* --- ЭКРАН ПРИВЕТСТВИЯ (LANDING) --- */
+    #FX_ROOT .landing-view {
+        position: absolute;
+        top: 0; left: 0; width: 100%; height: 100%;
+        display: flex;
+        flex-direction: column;
+        align-items: center;
+        justify-content: center;
+        z-index: 20;
+        transition: transform 0.6s cubic-bezier(0.68, -0.55, 0.27, 1.55), opacity 0.4s;
+        background: var(--bg-dark); /* Перекрывает редактор */
+    }
+    
+    #FX_ROOT .landing-view.hidden {
+        transform: translateY(-100%);
+        pointer-events: none;
+        opacity: 0;
+    }
+
+    /* Аватар сверху */
+    #FX_ROOT .hero-avatar-wrap {
+        position: relative;
+        width: 160px;
+        height: 160px;
+        margin-bottom: 20px;
+        border-radius: 50%;
+        padding: 4px;
+        background: linear-gradient(45deg, var(--primary), var(--secondary));
+        box-shadow: 0 0 30px rgba(255, 0, 85, 0.4);
+    }
+    
+    #FX_ROOT .hero-avatar-img {
+        width: 100%; height: 100%;
+        border-radius: 50%;
+        object-fit: cover;
+        background: #000;
+        border: 3px solid #000;
+    }
+
+    /* Название */
+    #FX_ROOT .brand-title {
+        font-size: 42px;
+        font-weight: 800;
+        text-transform: uppercase;
+        letter-spacing: 4px;
+        margin-bottom: 40px;
+        text-align: center;
+        background: linear-gradient(90deg, #fff, var(--secondary));
+        -webkit-background-clip: text;
+        -webkit-text-fill-color: transparent;
+        text-shadow: 0 0 20px rgba(0, 229, 255, 0.3);
+    }
+
+    /* Пульсирующая кнопка */
+    #FX_ROOT .btn-start {
+        padding: 18px 50px;
+        font-size: 20px;
+        font-weight: 700;
+        text-transform: uppercase;
+        letter-spacing: 2px;
+        color: #fff;
+        background: transparent;
+        border: 2px solid var(--primary);
+        border-radius: 50px;
+        cursor: pointer;
+        position: relative;
+        overflow: hidden;
+        transition: 0.3s;
+        box-shadow: 0 0 15px var(--primary), inset 0 0 10px var(--primary);
+        animation: neonPulse 2s infinite;
+        font-family: 'Rajdhani', sans-serif;
+    }
+
+    @keyframes neonPulse {
+        0% { box-shadow: 0 0 10px var(--primary), inset 0 0 5px var(--primary); transform: scale(1); }
+        50% { box-shadow: 0 0 30px var(--primary), inset 0 0 15px var(--primary); transform: scale(1.05); }
+        100% { box-shadow: 0 0 10px var(--primary), inset 0 0 5px var(--primary); transform: scale(1); }
+    }
+
+    #FX_ROOT .btn-start:hover {
+        background: var(--primary);
+        box-shadow: 0 0 50px var(--primary);
+        text-shadow: 0 0 5px #fff;
+    }
+
+    /* --- РЕДАКТОР (EDITOR) --- */
+    #FX_ROOT .editor-view {
+        width: 100%; height: 100%;
+        display: flex;
+        flex-direction: column;
+        opacity: 0;
+        transition: opacity 1s 0.3s;
+        padding: 10px;
+    }
+    #FX_ROOT .editor-view.visible { opacity: 1; }
+
+    /* Шапка редактора */
+    #FX_ROOT .editor-header {
+        display: flex;
+        justify-content: space-between;
+        align-items: center;
+        padding: 0 10px 15px;
+        border-bottom: 1px solid var(--border);
+        margin-bottom: 10px;
+    }
+    #FX_ROOT .editor-title { font-size: 20px; font-weight: 800; text-transform: uppercase; letter-spacing: 2px; }
+    #FX_ROOT .editor-title span { color: var(--primary); }
+    
+    #FX_ROOT .btn-back {
+        background: none; border: none; color: var(--text-muted);
+        cursor: pointer; font-size: 14px; text-transform: uppercase;
+        font-family: inherit; transition: 0.3s;
+    }
+    #FX_ROOT .btn-back:hover { color: #fff; }
+
+    /* Сетка редактора */
+    #FX_ROOT .editor-grid {
+        flex: 1;
+        display: grid;
+        grid-template-columns: 320px 1fr;
+        gap: 15px;
+        min-height: 0; /* Важно для скролла */
+    }
+
+    /* Панели */
+    #FX_ROOT .panel {
+        background: var(--bg-glass);
+        backdrop-filter: blur(10px);
+        -webkit-backdrop-filter: blur(10px);
+        border: 1px solid var(--border);
+        border-radius: 16px;
+        display: flex;
+        flex-direction: column;
+        overflow: hidden;
+    }
+
+    #FX_ROOT .controls-panel {
+        padding: 15px;
+        overflow-y: auto;
+        gap: 15px;
+    }
+
+    /* Элементы управления */
+    #FX_ROOT .control-group { display: flex; flex-direction: column; gap: 8px; }
+    #FX_ROOT label { font-size: 12px; text-transform: uppercase; color: var(--text-muted); letter-spacing: 1px; font-weight: 700; }
+    
+    #FX_ROOT input[type="text"], 
+    #FX_ROOT input[type="url"] {
+        background: rgba(0,0,0,0.3);
+        border: 1px solid var(--border);
+        color: #fff;
+        padding: 10px;
+        border-radius: 8px;
+        font-family: inherit;
+        font-size: 14px;
+    }
+    #FX_ROOT input:focus { border-color: var(--secondary); }
+
+    #FX_ROOT input[type="range"] {
+        -webkit-appearance: none; width: 100%; height: 4px;
+        background: rgba(255,255,255,0.1); border-radius: 2px; margin: 10px 0;
+    }
+    #FX_ROOT input[type="range"]::-webkit-slider-thumb {
+        -webkit-appearance: none; width: 16px; height: 16px;
+        background: var(--primary); border-radius: 50%; cursor: pointer;
+        box-shadow: 0 0 10px var(--primary);
+    }
+
+    /* Табы анимации */
+    #FX_ROOT .anim-tabs { display: flex; background: rgba(0,0,0,0.3); padding: 4px; border-radius: 8px; margin-bottom: 5px; }
+    #FX_ROOT .tab-btn {
+        flex: 1; border: none; background: none; color: var(--text-muted);
+        padding: 6px; font-size: 12px; cursor: pointer; border-radius: 6px;
+        text-transform: uppercase; font-family: inherit; font-weight: 700; transition: 0.2s;
+    }
+    #FX_ROOT .tab-btn.active { background: rgba(255,255,255,0.1); color: #fff; }
+
+    #FX_ROOT .anim-grid { display: none; grid-template-columns: 1fr 1fr; gap: 8px; }
+    #FX_ROOT .anim-grid.show { display: grid; }
+
+    #FX_ROOT .anim-item {
+        background: rgba(255,255,255,0.03); border: 1px solid transparent;
+        color: #ccc; padding: 8px; font-size: 12px; text-align: center;
+        border-radius: 6px; cursor: pointer; transition: 0.2s;
+    }
+    #FX_ROOT .anim-item:hover { background: rgba(255,255,255,0.08); }
+    #FX_ROOT .anim-item.selected {
+        border-color: var(--secondary); color: var(--secondary);
+        background: rgba(0, 229, 255, 0.1); box-shadow: 0 0 10px rgba(0, 229, 255, 0.1);
+    }
+
+    /* Палитра и Свечение */
+    #FX_ROOT .glow-controls { display: flex; align-items: center; gap: 10px; }
+    #FX_ROOT input[type="color"] {
+        -webkit-appearance: none; border: none; width: 30px; height: 30px;
+        border-radius: 50%; overflow: hidden; padding: 0; cursor: pointer;
+        box-shadow: 0 0 0 2px var(--border);
+    }
+    #FX_ROOT input[type="color"]::-webkit-color-swatch-wrapper { padding: 0; }
+    #FX_ROOT input[type="color"]::-webkit-color-swatch { border: none; }
+
+    /* Превью */
+    #FX_ROOT .preview-panel {
+        position: relative;
+        background-image: 
+            linear-gradient(rgba(255,255,255,0.03) 1px, transparent 1px),
+            linear-gradient(90deg, rgba(255,255,255,0.03) 1px, transparent 1px);
+        background-size: 20px 20px;
+        display: flex;
+        justify-content: center;
+        align-items: center;
+    }
+    
+    #FX_ROOT .char-wrapper { transition: transform 0.1s; }
+    #FX_ROOT .char-img { max-width: 100%; max-height: 400px; object-fit: contain; display: block; }
+    
+    /* Code Output */
+    #FX_ROOT .code-panel {
+        height: 80px;
+        border-top: 1px solid var(--border);
+        background: #000;
+        display: flex;
+    }
+    #FX_ROOT textarea {
+        flex: 1; background: transparent; border: none; color: var(--secondary);
+        font-family: monospace; font-size: 10px; resize: none; padding: 10px;
+    }
+    #FX_ROOT .btn-copy {
+        background: var(--secondary); color: #000; border: none;
+        width: 80px; font-weight: 700; cursor: pointer; text-transform: uppercase;
+        font-size: 11px; transition: 0.2s;
+    }
+    #FX_ROOT .btn-copy:hover { background: #fff; }
+
+    /* АДАПТИВНОСТЬ */
+    @media (max-width: 768px) {
+        #FX_ROOT .editor-grid { grid-template-columns: 1fr; grid-template-rows: auto 1fr; }
+        #FX_ROOT .preview-panel { min-height: 250px; order: -1; }
+    }
+
+    /* --- АНИМАЦИИ (KEYFRAMES) --- */
+    @keyframes fx-idle { 0%,100% {transform:translateY(0)} 50% {transform:translateY(-6px)} }
+    @keyframes fx-float { 0%,100% {transform:translateY(0) rotate(0deg)} 50% {transform:translateY(-15px) rotate(2deg)} }
+    @keyframes fx-pulse { 0%,100% {transform:scale(1)} 50% {transform:scale(1.05)} }
+    @keyframes fx-shake { 0% { transform: translate(1px, 1px) rotate(0deg); } 10% { transform: translate(-1px, -2px) rotate(-1deg); } 20% { transform: translate(-3px, 0px) rotate(1deg); } 30% { transform: translate(3px, 2px) rotate(0deg); } 40% { transform: translate(1px, -1px) rotate(1deg); } 50% { transform: translate(-1px, 2px) rotate(-1deg); } 60% { transform: translate(-3px, 1px) rotate(0deg); } 70% { transform: translate(3px, 1px) rotate(-1deg); } 80% { transform: translate(-1px, -1px) rotate(1deg); } 90% { transform: translate(1px, 2px) rotate(0deg); } 100% { transform: translate(1px, -2px) rotate(-1deg); } }
+    @keyframes fx-glitch { 0% { transform: translate(0) } 20% { transform: translate(-2px, 2px) } 40% { transform: translate(-2px, -2px) } 60% { transform: translate(2px, 2px) } 80% { transform: translate(2px, -2px) } 100% { transform: translate(0) } }
+    @keyframes fx-spin { 0% { transform: rotateY(0deg); } 100% { transform: rotateY(360deg); } }
+    @keyframes fx-neon { 0%,100% { opacity: 1; filter: brightness(1); } 50% { opacity: 0.8; filter: brightness(1.5); } }
+
+    #FX_ROOT .anim-idle { animation: fx-idle var(--dur) ease-in-out infinite; }
+    #FX_ROOT .anim-float { animation: fx-float var(--dur) ease-in-out infinite; }
+    #FX_ROOT .anim-pulse { animation: fx-pulse var(--dur) ease-in-out infinite; }
+    #FX_ROOT .anim-shake { animation: fx-shake var(--dur) linear infinite; }
+    #FX_ROOT .anim-glitch { animation: fx-glitch var(--dur) steps(2) infinite; }
+    #FX_ROOT .anim-spin { animation: fx-spin var(--dur) linear infinite; }
+    #FX_ROOT .anim-neon { animation: fx-neon var(--dur) steps(3) infinite; }
+
+</style>
+
+<!-- LANDING PAGE -->
+<div class="landing-view" id="fx_landing">
+    <!-- АВАТАР ИЗ РЕФЕРЕНСА -->
+    <div class="hero-avatar-wrap">
+        <!-- Ссылка на изображение из вашего референса (или похожее) -->
+        <img src="https://i.pinimg.com/736x/8b/16/7a/8b167af653c239996c9926978170d65b.jpg" class="hero-avatar-img" alt="Hero Avatar">
+    </div>
+    
+    <div class="brand-title">Neon Morphic</div>
+    
+    <button class="btn-start" id="fx_btn_start">Создать Героя</button>
+</div>
+
+<!-- EDITOR PAGE -->
+<div class="editor-view" id="fx_editor">
+    <div class="editor-header">
+        <div class="editor-title">Repo: <span>character-editor</span></div>
+        <button class="btn-back" id="fx_btn_back">← Назад</button>
+    </div>
+
+    <div class="editor-grid">
+        <!-- Left: Controls -->
+        <div class="panel controls-panel">
+            
+            <div class="control-group">
+                <label>Ссылка на персонажа</label>
+                <!-- Дефолтное изображение с прозрачным фоном для теста -->
+                <input type="text" id="fx_img_url" value="https://cdn-icons-png.flaticon.com/512/9308/9308697.png">
+            </div>
+
+            <div class="control-group">
+                <label>Анимация</label>
+                <div class="anim-tabs">
+                    <button class="tab-btn active" data-tab="simple">Простая</button>
+                    <button class="tab-btn" data-tab="complex">Сложная</button>
+                </div>
+                
+                <!-- Simple Animations -->
+                <div class="anim-grid show" id="grid_simple">
+                    <div class="anim-item selected" data-anim="none">Нет</div>
+                    <div class="anim-item" data-anim="idle">Дыхание</div>
+                    <div class="anim-item" data-anim="float">Парение</div>
+                    <div class="anim-item" data-anim="pulse">Пульс</div>
+                </div>
+                <!-- Complex Animations -->
+                <div class="anim-grid" id="grid_complex">
+                    <div class="anim-item" data-anim="glitch">Глитч</div>
+                    <div class="anim-item" data-anim="shake">Тряска</div>
+                    <div class="anim-item" data-anim="spin">3D Спин</div>
+                    <div class="anim-item" data-anim="neon">Мерцание</div>
+                </div>
+            </div>
+
+            <div class="control-group">
+                <label>Свечение (Цвет / Яркость)</label>
+                <div class="glow-controls">
+                    <input type="color" id="fx_glow_color" value="#ff0055">
+                    <input type="range" id="fx_glow_power" min="0" max="50" value="0" style="margin:0; flex:1;">
+                </div>
+            </div>
+
+            <div class="control-group">
+                <label>Размер: <span id="val_size">100%</span></label>
+                <input type="range" id="fx_size" min="50" max="150" value="100">
+            </div>
+
+            <div class="control-group">
+                <label>Скорость: <span id="val_speed">1.0x</span></label>
+                <input type="range" id="fx_speed" min="0.5" max="3" step="0.1" value="1">
+            </div>
+
+        </div>
+
+        <!-- Right: Preview -->
+        <div class="panel">
+            <div class="preview-panel">
+                <div class="char-wrapper" id="fx_wrapper">
+                    <img src="" id="fx_preview_img" class="char-img">
+                </div>
+            </div>
+            <div class="code-panel">
+                <textarea id="fx_code" readonly></textarea>
+                <button class="btn-copy" id="fx_btn_copy">Copy</button>
+            </div>
+        </div>
+    </div>
+</div>
+
+<script>
+(function() {
+    const root = document.getElementById('FX_ROOT');
+    const landing = root.querySelector('#fx_landing');
+    const editor = root.querySelector('#fx_editor');
+    
+    // Элементы
+    const inputs = {
+        url: root.querySelector('#fx_img_url'),
+        size: root.querySelector('#fx_size'),
+        speed: root.querySelector('#fx_speed'),
+        color: root.querySelector('#fx_glow_color'),
+        glow: root.querySelector('#fx_glow_power')
+    };
+    
+    const display = {
+        size: root.querySelector('#val_size'),
+        speed: root.querySelector('#val_speed'),
+        img: root.querySelector('#fx_preview_img'),
+        wrapper: root.querySelector('#fx_wrapper'),
+        code: root.querySelector('#fx_code')
+    };
+
+    let state = { anim: 'none' };
+
+    // 1. Переключение экранов
+    root.querySelector('#fx_btn_start').onclick = () => {
+        landing.classList.add('hidden');
+        editor.classList.add('visible');
+        update();
+    };
+    root.querySelector('#fx_btn_back').onclick = () => {
+        landing.classList.remove('hidden');
+        editor.classList.remove('visible');
+    };
+
+    // 2. Табы анимации
+    const tabs = root.querySelectorAll('.tab-btn');
+    const grids = {
+        simple: root.querySelector('#grid_simple'),
+        complex: root.querySelector('#grid_complex')
+    };
+
+    tabs.forEach(t => t.onclick = () => {
+        tabs.forEach(b => b.classList.remove('active'));
+        t.classList.add('active');
+        
+        Object.values(grids).forEach(g => g.classList.remove('show'));
+        grids[t.dataset.tab].classList.add('show');
+    });
+
+    // 3. Выбор анимации
+    const animItems = root.querySelectorAll('.anim-item');
+    animItems.forEach(item => item.onclick = () => {
+        animItems.forEach(i => i.classList.remove('selected'));
+        item.classList.add('selected');
+        state.anim = item.dataset.anim;
+        update();
+    });
+
+    // 4. Обновление
+    function update() {
+        const url = inputs.url.value;
+        const size = inputs.size.value;
+        const speed = inputs.speed.value;
+        const glowColor = inputs.color.value;
+        const glowPower = inputs.glow.value;
+
+        // UI Updates
+        display.size.innerText = size + '%';
+        display.speed.innerText = speed + 'x';
+
+        // Preview Apply
+        if(display.img.src !== url) display.img.src = url;
+        display.wrapper.style.transform = `scale(${size/100})`;
+        
+        display.img.className = 'char-img'; // reset
+        if(state.anim !== 'none') display.img.classList.add('anim-' + state.anim);
+        
+        // CSS Vars for Preview
+        const duration = (state.anim === 'shake' ? 0.8 : 2) / speed; // Базовая скорость
+        display.img.style.setProperty('--dur', duration + 's');
+        
+        const filter = glowPower > 0 ? `drop-shadow(0 0 ${glowPower}px ${glowColor})` : 'none';
+        display.img.style.filter = filter;
+
+        generateCode(url, size, speed, glowColor, glowPower, filter, duration);
+    }
+
+    // 5. Генерация кода для GitHub Pages
+    function generateCode(url, size, speed, color, power, filter, dur) {
+        // Упрощенный CSS для вставки
+        const keyframes = `
+@keyframes fx-idle { 0%,100% {transform:translateY(0)} 50% {transform:translateY(-6px)} }
+@keyframes fx-float { 0%,100% {transform:translateY(0) rotate(0deg)} 50% {transform:translateY(-15px) rotate(2deg)} }
+@keyframes fx-pulse { 0%,100% {transform:scale(1)} 50% {transform:scale(1.05)} }
+@keyframes fx-shake { 0% { transform: translate(1px, 1px) rotate(0deg); } 10% { transform: translate(-1px, -2px) rotate(-1deg); } 20% { transform: translate(-3px, 0px) rotate(1deg); } 30% { transform: translate(3px, 2px) rotate(0deg); } 40% { transform: translate(1px, -1px) rotate(1deg); } 50% { transform: translate(-1px, 2px) rotate(-1deg); } 60% { transform: translate(-3px, 1px) rotate(0deg); } 70% { transform: translate(3px, 1px) rotate(-1deg); } 80% { transform: translate(-1px, -1px) rotate(1deg); } 90% { transform: translate(1px, 2px) rotate(0deg); } 100% { transform: translate(1px, -2px) rotate(-1deg); } }
+@keyframes fx-glitch { 0% { transform: translate(0) } 20% { transform: translate(-2px, 2px) } 40% { transform: translate(-2px, -2px) } 60% { transform: translate(2px, 2px) } 80% { transform: translate(2px, -2px) } 100% { transform: translate(0) } }
+@keyframes fx-spin { 0% { transform: rotateY(0deg); } 100% { transform: rotateY(360deg); } }
+@keyframes fx-neon { 0%,100% { opacity: 1; filter: brightness(1) ${filter}; } 50% { opacity: 0.8; filter: brightness(1.5) ${filter}; } }
+        `;
+
+        let animRule = '';
+        if(state.anim !== 'none') {
+            animRule = `animation: fx-${state.anim} ${dur}s infinite ${state.anim === 'glitch' ? 'steps(2)' : (state.anim === 'shake' || state.anim === 'spin' ? 'linear' : 'ease-in-out')};`;
+        }
+
+        const htmlBlock = `
+<div style="display:flex;justify-content:center;align-items:center;height:100vh;overflow:hidden;background:transparent;">
+  <style>${keyframes}</style>
+  <div style="transform:scale(${size/100})">
+     <img src="${url}" style="max-width:100%; ${animRule} filter:${filter};">
+  </div>
+</div>`;
+        
+        display.code.value = `<iframe srcdoc="${htmlBlock.replace(/"/g, '&quot;')}" width="100%" height="100%" frameborder="0"></iframe>`;
+    }
+
+    // Слушатели событий
+    Object.values(inputs).forEach(el => el.addEventListener('input', update));
+    
+    root.querySelector('#fx_btn_copy').onclick = function() {
+        display.code.select();
+        document.execCommand('copy');
+        this.innerText = 'OK!';
+        setTimeout(() => this.innerText = 'COPY', 1000);
+    };
+
+    // Инит
+    update();
+})();
+</script>
+
+</div>
